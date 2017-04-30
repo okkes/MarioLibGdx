@@ -17,10 +17,10 @@ import com.jinbu.mariobros.Scenes.Hud;
  * Created by 15049051 on 29/04/2017.
  */
 public class PlayScreen implements Screen {
-    private MarioBros game;
-    private OrthographicCamera gameCam;
-    private Viewport gamePort;
-    private Hud hud;
+    private MarioBros           game;
+    private OrthographicCamera  gameCam;
+    private Viewport            gamePort;
+    private Hud                 hud;
 
     // load our map into the game
     private TmxMapLoader maploader;
@@ -36,15 +36,18 @@ public class PlayScreen implements Screen {
         // Set screen color to black
         Gdx.gl.glClearColor(0, 0, 0, 1);
 
-        gameCam = new OrthographicCamera();
-//        gamePort = new StretchViewport(800, 480, gameCam); stretches to the screen size
-//        gamePort = new ScreenViewport(gameCam); // shows more when the screen is bigger
-        gamePort = new FitViewport(MarioBros.V_WIDTH, MarioBros.V_HEIGHT, gameCam); // add bars to the screen to keep the ratio.
-        hud = new Hud(game.batch);
+        // Create cam used to follow mario through cam world
+        gameCam     = new OrthographicCamera();
 
-        maploader = new TmxMapLoader();
-        map = maploader.load("level1.tmx");
-        renderer = new OrthogonalTiledMapRenderer(map);
+        // Create a FitViewport to maintain virtual aspect ratio despite screen size
+        gamePort    = new FitViewport(MarioBros.V_WIDTH, MarioBros.V_HEIGHT, gameCam); // add bars to the screen to keep the ratio.
+
+        // Create our game HUD for scores/timers/levle info
+        hud         = new Hud(game.batch);
+
+        maploader   = new TmxMapLoader();
+        map         = maploader.load("level1.tmx");
+        renderer    = new OrthogonalTiledMapRenderer(map);
 
         gameCam.position.set(gamePort.getWorldWidth() / 2, gamePort.getWorldHeight() / 2, 0);
     }
