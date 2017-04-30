@@ -54,7 +54,6 @@ public class PlayScreen implements Screen {
     @Override
     public void pause() {
         System.out.println("pause");
-        System.out.println("Hello Github");
     }
 
     @Override
