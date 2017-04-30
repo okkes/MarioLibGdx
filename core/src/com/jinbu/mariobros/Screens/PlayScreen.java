@@ -5,6 +5,9 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.jinbu.mariobros.MarioBros;
@@ -19,6 +22,15 @@ public class PlayScreen implements Screen {
     private Viewport gamePort;
     private Hud hud;
 
+    // load our map into the game
+    private TmxMapLoader maploader;
+
+    // reference to the map itself
+    private TiledMap map;
+
+    // This is what renders our map to the screen
+    private OrthogonalTiledMapRenderer renderer;
+
     public PlayScreen(MarioBros game){
         this.game = game;
         // Set screen color to black
@@ -29,6 +41,28 @@ public class PlayScreen implements Screen {
 //        gamePort = new ScreenViewport(gameCam); // shows more when the screen is bigger
         gamePort = new FitViewport(MarioBros.V_WIDTH, MarioBros.V_HEIGHT, gameCam); // add bars to the screen to keep the ratio.
         hud = new Hud(game.batch);
+
+        maploader = new TmxMapLoader();
+        map = maploader.load("level1.tmx");
+        renderer = new OrthogonalTiledMapRenderer(map);
+
+        gameCam.position.set(gamePort.getWorldWidth() / 2, gamePort.getWorldHeight() / 2, 0);
+    }
+
+    public void update(float dt){
+        // check if any input is happening
+        handleInput(dt);
+
+        // update cam
+        gameCam.update();
+
+        renderer.setView(gameCam);
+    }
+
+    private void handleInput(float dt){
+        if(Gdx.input.isTouched()){
+            gameCam.position.x += 100 * dt; // temp
+        }
     }
 
     @Override
@@ -38,8 +72,11 @@ public class PlayScreen implements Screen {
 
     @Override
     public void render(float delta) {
+        update(delta);
         // Clear screen
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        renderer.render();
 
         // render only what the camera can see rather than everything
         game.batch.setProjectionMatrix(hud.stage.getCamera().combined);
