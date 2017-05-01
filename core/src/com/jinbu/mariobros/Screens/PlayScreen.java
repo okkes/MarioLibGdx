@@ -32,9 +32,8 @@ public class PlayScreen implements Screen {
     private OrthogonalTiledMapRenderer renderer;
 
     public PlayScreen(MarioBros game){
-        this.game = game;
-        // Set screen color to black
-        Gdx.gl.glClearColor(0, 0, 0, 1);
+        // Keep the reference in order to set another screen later on.
+        this.game   = game;
 
         // Create cam used to follow mario through cam world
         gameCam     = new OrthographicCamera();
@@ -49,22 +48,27 @@ public class PlayScreen implements Screen {
         map         = maploader.load("level1.tmx");
         renderer    = new OrthogonalTiledMapRenderer(map);
 
+        // The gamecam's default focus position is the coordinate 0,0 (which is on the left bottom corner.
+        // The gameCam will use the 0,0 as centerpoint. If we keep it as the default, we will miss 50% of the view.
+        // So in order to show the left bottom corner of the worldmap in the left bottom corner of the screen.
+        // We have to get the world with and devide that by 2 + height / 2, the last param is the z axes, which we don't
+        // use for the 2d game world.
         gameCam.position.set(gamePort.getWorldWidth() / 2, gamePort.getWorldHeight() / 2, 0);
     }
 
-    public void update(float dt){
+    public void update(float delta){
         // check if any input is happening
-        handleInput(dt);
+        handleInput(delta);
 
-        // update cam
+        // update cam after changing the position.
         gameCam.update();
 
         renderer.setView(gameCam);
     }
 
-    private void handleInput(float dt){
+    private void handleInput(float delta){
         if(Gdx.input.isTouched()){
-            gameCam.position.x += 100 * dt; // temp
+            gameCam.position.x += 100 * delta; // temp
         }
     }
 
@@ -76,6 +80,10 @@ public class PlayScreen implements Screen {
     @Override
     public void render(float delta) {
         update(delta);
+
+        // Set screen color to black
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+
         // Clear screen
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
