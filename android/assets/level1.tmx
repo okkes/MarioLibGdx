@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="240" height="13" tilewidth="16" tileheight="16" nextobjectid="42">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="240" height="13" tilewidth="16" tileheight="16" nextobjectid="52">
  <tileset firstgid="1" name="tileset_gutter" tilewidth="16" tileheight="16" spacing="2" margin="1" tilecount="924" columns="33">
   <image source="tileset_gutter.png" width="594" height="504"/>
  </tileset>
@@ -16,11 +16,11 @@
  <objectgroup name="ground">
   <object id="3" x="0" y="192" width="912" height="16"/>
   <object id="4" x="1008" y="192" width="160" height="16"/>
-  <object id="40" x="656" y="192">
-   <polygon points="0,0 0,-16 16,-16 16,-32 32,-32 32,-48 48,-48 48,-64 64,-64 64,0"/>
+  <object id="50" x="768" y="128">
+   <polygon points="0,0 0,64 64,64 64,48 48,48 48,32 32,32 32,16 16,16 16,0 0,0"/>
   </object>
-  <object id="41" x="768" y="128">
-   <polygon points="0,0 0,64 64,64 64,48 48,48 48,32 32,32 32,16 16,16 16,0"/>
+  <object id="51" x="720" y="128">
+   <polygon points="0,0 0,64 -64,64 -64,48 -48,48 -48,32 -32,32 -32,16 -16,16 -16,0 0,0"/>
   </object>
  </objectgroup>
  <objectgroup name="pipes">

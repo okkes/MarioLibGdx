@@ -13,7 +13,7 @@ public class MarioBros extends Game {
 	// 280 / 16 = 13.
 	public static final int V_WIDTH = 400;
 	public static final int V_HEIGHT = 208;
-
+	public static final float PPM = 100;
 	// Spritebatch is very memory intensive. So only have 1 spritebatch per game. Make it public in order to make it accessible
 	// to other classes or pass it around.
 	public SpriteBatch batch;
