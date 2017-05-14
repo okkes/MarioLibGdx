@@ -6,13 +6,13 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.physics.box2d.World;
 
 /**
- * Created by 15049051 on 09/05/2017.
+ * Created by 15049051 on 14/05/2017.
  */
-public class Pipe extends InteractiveRectangleObject {
-    public final static String LAYER_NAME   = "pipes";
+public class Ground extends InteractiveRectangleObject {
+    public final static String LAYER_NAME = "ground";
     public final static Class<RectangleMapObject> TYPE = RectangleMapObject.class; // TODO: move to super?, make it more dynamic?
 
-    public Pipe (World world, TiledMap map, MapObject object){
+    public Ground(World world, TiledMap map, MapObject object) {
         super(world, map, object);
     }
 }

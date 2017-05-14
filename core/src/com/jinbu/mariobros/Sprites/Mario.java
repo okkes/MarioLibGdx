@@ -31,6 +31,7 @@ public class Mario extends Sprite{
         shape.setRadius(5 / PPM);
 
         fdef.shape = shape;
+
         b2body.createFixture(fdef);
     }
 }

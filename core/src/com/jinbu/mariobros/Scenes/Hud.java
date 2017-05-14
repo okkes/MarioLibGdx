@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.jinbu.mariobros.MarioBros;
@@ -14,7 +15,7 @@ import com.jinbu.mariobros.MarioBros;
 /**
  * Created by 15049051 on 29/04/2017.
  */
-public class Hud {
+public class Hud implements Disposable{
     public Stage stage;
     // When our game world moves, we want to hud to stay on its place.
     // In order to do that, we will create a different camera for the hud.
@@ -66,5 +67,10 @@ public class Hud {
         table.add(countdownLabel).expandX();
 
         stage.addActor(table);
+    }
+
+    @Override
+    public void dispose() {
+        stage.dispose();
     }
 }
