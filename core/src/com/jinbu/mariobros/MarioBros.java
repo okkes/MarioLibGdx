@@ -1,9 +1,13 @@
 package com.jinbu.mariobros;
 
 import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.jinbu.mariobros.Screens.PlayScreen;
+import com.jinbu.mariobros.Tools.DesktopController;
+import com.jinbu.mariobros.Tools.InputHandler;
+import com.jinbu.mariobros.Tools.AndroindController;
 
 public class MarioBros extends Game {
 	// virtual width and height for the game. These units will be used to have a responsive game world
@@ -22,9 +26,21 @@ public class MarioBros extends Game {
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
+        InputHandler controller;
+		switch(Gdx.app.getType()) {
+			case Android:
+				controller = new AndroindController();
+				break;
+			case Desktop:
+				controller = new DesktopController();
+				break;
+            default:
+                System.out.println("Unknown device found. Desktop controller is loaded.");
+                controller = new DesktopController();
+		}
 
 		// By passing this game class to the screen, the screen class can set another screen by himself.
-		setScreen(new PlayScreen(this));
+		setScreen(new PlayScreen(this, controller));
 	}
 
 	@Override

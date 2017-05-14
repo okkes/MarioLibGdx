@@ -22,6 +22,7 @@ import com.jinbu.mariobros.MarioBros;
 import com.jinbu.mariobros.Scenes.Hud;
 import com.jinbu.mariobros.Sprites.Mario;
 import com.jinbu.mariobros.Tools.B2WorldCreator;
+import com.jinbu.mariobros.Tools.InputHandler;
 
 import static com.jinbu.mariobros.MarioBros.PPM;
 
@@ -29,6 +30,7 @@ import static com.jinbu.mariobros.MarioBros.PPM;
  * Created by 15049051 on 29/04/2017.
  */
 public class PlayScreen implements Screen {
+    private final InputHandler  controller;
     private MarioBros           game;
     private OrthographicCamera  gameCam;
     private Viewport            gamePort;
@@ -50,9 +52,11 @@ public class PlayScreen implements Screen {
 
     private Mario player;
 
-    public PlayScreen(MarioBros game){
+    public PlayScreen(MarioBros game, InputHandler controller){
         // Keep the reference in order to set another screen later on.
         this.game   = game;
+
+        this.controller = controller;
 
         // Create cam used to follow mario through cam world
         gameCam     = new OrthographicCamera();
@@ -134,7 +138,7 @@ public class PlayScreen implements Screen {
     private void handleInput(float delta){
         // There are two ways to move an object in box2d. you can use force which is gradual increase or decrease in speed
         // Or you could use inpulse, which is an imediate change in speed
-        if(Gdx.input.isKeyJustPressed(Input.Keys.UP)){
+        if(controller.upIsPressed() && player.b2body.getLinearVelocity().y == 0){
             // Do we want to impulse it to x or y direction. you can do that by sending the vector.
             // You can tell the box2d where to apply this inpulse/vorce to the body. By applying directly to the center of the body
             // it won't for example spin.
@@ -142,11 +146,11 @@ public class PlayScreen implements Screen {
             player.b2body.applyLinearImpulse(new Vector2(0, 4f), player.b2body.getWorldCenter(), true);
         }
 
-        if(Gdx.input.isKeyPressed(Input.Keys.RIGHT) && player.b2body.getLinearVelocity().x <= 2){
+        if(controller.rightIsPressed() && player.b2body.getLinearVelocity().x <= 2){
             player.b2body.applyLinearImpulse(new Vector2(0.1f, 0), player.b2body.getWorldCenter(), true);
         }
 
-        if(Gdx.input.isKeyPressed(Input.Keys.LEFT) && player.b2body.getLinearVelocity().x >= -2){
+        if(controller.leftIsPressed() && player.b2body.getLinearVelocity().x >= -2){
             player.b2body.applyLinearImpulse(new Vector2(-0.1f, 0), player.b2body.getWorldCenter(), true);
         }
     }
