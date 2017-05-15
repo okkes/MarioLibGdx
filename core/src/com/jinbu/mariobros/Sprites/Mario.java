@@ -1,7 +1,10 @@
 package com.jinbu.mariobros.Sprites;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.*;
+import com.jinbu.mariobros.Screens.PlayScreen;
 
 import static com.jinbu.mariobros.MarioBros.PPM;
 
@@ -14,9 +17,20 @@ public class Mario extends Sprite{
 
     public Body b2body;
 
-    public Mario(World world){
+    // get the individuel texture of mario standing still
+    private TextureRegion marioStand;
+
+    public Mario(World world, PlayScreen screen){
+        // make a call to super, which is a sprite class and it can take a textureregion that we can manupulate later.
+        super(screen.getAtlas().findRegion("little_mario"));
+        
         this.world = world;
         defineMario();
+
+        // the first param is the texture we want to get.
+        marioStand = new TextureRegion(getTexture(), 0, 10, 16, 16);
+        setBounds(0, 0, 16 / PPM, 16 / PPM);
+        setRegion(marioStand);
     }
 
     public void defineMario(){
@@ -28,10 +42,14 @@ public class Mario extends Sprite{
         FixtureDef fdef = new FixtureDef();
         // we need to create a circle shape
         CircleShape shape = new CircleShape();
-        shape.setRadius(5 / PPM);
+        shape.setRadius(6 / PPM);
 
         fdef.shape = shape;
 
         b2body.createFixture(fdef);
+    }
+
+    public void update(float dt){
+        setPosition(b2body.getPosition().x - getWidth() / 2, b2body.getPosition().y - getHeight() / 2);
     }
 }

@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.PolygonMapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
@@ -31,7 +32,9 @@ import static com.jinbu.mariobros.MarioBros.PPM;
  */
 public class PlayScreen implements Screen {
     private final InputHandler  controller;
+
     private MarioBros           game;
+    private TextureAtlas        atlas;
     private OrthographicCamera  gameCam;
     private Viewport            gamePort;
     private Hud                 hud;
@@ -53,6 +56,9 @@ public class PlayScreen implements Screen {
     private Mario player;
 
     public PlayScreen(MarioBros game, InputHandler controller){
+        //todo: you may want to look at asset manager in order to manage your textures much better.
+        atlas = new TextureAtlas("Mario_and_Enemies.pack");
+
         // Keep the reference in order to set another screen later on.
         this.game   = game;
 
@@ -88,7 +94,11 @@ public class PlayScreen implements Screen {
 
         Level1 level = new Level1(map, world);
 
-        player = new Mario(this.world);
+        player = new Mario(this.world, this);
+    }
+
+    public TextureAtlas getAtlas(){
+        return atlas;
     }
 
     @Override
@@ -111,6 +121,12 @@ public class PlayScreen implements Screen {
 
         b2dr.render(world, gameCam.combined);
 
+        // main cam when we run around
+        game.batch.setProjectionMatrix(gameCam.combined);
+        game.batch.begin();
+        player.draw(game.batch);
+        game.batch.end();
+
         // render only what the camera can see rather than everything
         game.batch.setProjectionMatrix(hud.stage.getCamera().combined);
 
@@ -123,10 +139,18 @@ public class PlayScreen implements Screen {
         // In order for box2d to execute the simulation, we need to tell him, how many times to calculate per second.
         // velocity and position iterations effects how two bodies react during the collision, the higher the number,
         // the preciser but longer the calculation takes.
+        // takes 1 step in the physics simulation (60 times per second)
         world.step(1/60f, 6, 2);
 
+        player.update(delta);
+
+        // The if statement ensures the camera follows the player only within the world. This
+        // prevents the black screen you get at the start of the game.
+        if(player.b2body.getPosition().x >= MarioBros.V_WIDTH / 2 / PPM) {
+            gameCam.position.x = player.b2body.getPosition().x;
+        }
         // follow mario on the x
-        gameCam.position.x = player.b2body.getPosition().x;
+        //gameCam.position.x = player.b2body.getPosition().x;
 
         // Always update the camera anytime it moves.
         gameCam.update();
@@ -153,6 +177,39 @@ public class PlayScreen implements Screen {
         if(controller.leftIsPressed() && player.b2body.getLinearVelocity().x >= -2){
             player.b2body.applyLinearImpulse(new Vector2(-0.1f, 0), player.b2body.getWorldCenter(), true);
         }
+    }
+
+    //todo: check if this fixes the android bugs.
+    private void inputExample(){
+//        if (Gdx.input.isTouched())
+//        {
+//            int dX = Gdx.input.getDeltaX();
+//            int dY = Gdx.input.getDeltaY();
+//
+//            if (Math.abs(dX)+5 > Math.abs(dY))
+//            {
+//                if (dX>0 && player.b2body.getLinearVelocity().x <= 2)
+//                    controller.rightPressed = true;
+//                if (dX<0 && player.b2body.getLinearVelocity().x >= -2)
+//                    controller.leftPressed = true;
+//            }
+//            else
+//            {
+//                if (player.b2body.getLinearVelocity().y == 0)
+//                    controller.upPressed = true;
+//            }
+//        }
+//
+//        if(controller.isUpPressed()  && player.b2body.getLinearVelocity().y == 0)
+//            player.b2body.applyLinearImpulse(new Vector2(0,4f), player.b2body.getWorldCenter(),true);
+//        if (controller.isRightPressed()&& player.b2body.getLinearVelocity().x <= 2)
+//            player.b2body.applyLinearImpulse(new Vector2(0.1f,0), player.b2body.getWorldCenter(), true);
+//        if (controller.isLeftPressed()&& player.b2body.getLinearVelocity().x>=-2)
+//            player.b2body.applyLinearImpulse(new Vector2(-0.1f,0), player.b2body.getWorldCenter(), true);
+//
+//        controller.leftPressed=false;
+//        controller.rightPressed=false;
+//        controller.upPressed = false;
     }
 
     @Override
