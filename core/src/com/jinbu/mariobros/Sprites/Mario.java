@@ -23,7 +23,7 @@ public class Mario extends Sprite{
     public Mario(World world, PlayScreen screen){
         // make a call to super, which is a sprite class and it can take a textureregion that we can manupulate later.
         super(screen.getAtlas().findRegion("little_mario"));
-        
+
         this.world = world;
         defineMario();
 
@@ -33,7 +33,7 @@ public class Mario extends Sprite{
         setRegion(marioStand);
     }
 
-    public void defineMario(){
+    private void defineMario(){
         BodyDef bdef = new BodyDef();
         bdef.position.set(32 / PPM, 32 / PPM); // temp
         bdef.type = BodyDef.BodyType.DynamicBody;
@@ -42,9 +42,11 @@ public class Mario extends Sprite{
         FixtureDef fdef = new FixtureDef();
         // we need to create a circle shape
         CircleShape shape = new CircleShape();
+        PolygonShape shape2 = new PolygonShape();
+        shape2.setAsBox(6 / PPM, 6 / PPM);
         shape.setRadius(6 / PPM);
 
-        fdef.shape = shape;
+        fdef.shape = shape2;
 
         b2body.createFixture(fdef);
     }

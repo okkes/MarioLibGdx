@@ -9,28 +9,43 @@ import com.badlogic.gdx.Input;
 public class AndroindController extends InputHandler{
     @Override
     public boolean leftIsPressed() {
-        boolean leftScreenAreaClicked = Gdx.input.getX() >= 0 && Gdx.input.getX() <= 200;
-        boolean screenIsPressed = Gdx.input.isTouched();
-        if(leftScreenAreaClicked && screenIsPressed){
-            return true;
+        for(int i = 0; i < 2; i++){
+            if(Gdx.input.isTouched(i)) {
+                boolean leftAreaClicked = Gdx.input.getX(i) >= 0 && Gdx.input.getX(i) <= 200;
+
+                if (leftAreaClicked) {
+                    return true;
+                }
+            }
         }
         return false;
     }
 
     @Override
     public boolean rightIsPressed() {
-        boolean leftScreenAreaClicked = Gdx.input.getX() >= 250 && Gdx.input.getX() <= 450;
-        boolean screenIsPressed = Gdx.input.isTouched();
-        if(leftScreenAreaClicked && screenIsPressed){
-            return true;
+        for(int i = 0; i < 2; i++){
+            if(Gdx.input.isTouched(i)) {
+                boolean rightAreaClicked = Gdx.input.getX(i) >= 250 && Gdx.input.getX(i) <= 450;
+
+                if (rightAreaClicked) {
+                    return true;
+                }
+            }
         }
         return false;
     }
 
     @Override
     public boolean upIsPressed() {
-        if(Gdx.input.getX() >= 500 && Gdx.input.isTouched()){
-            return true;
+        if(Gdx.input.justTouched()){
+            for(int i = 0; i < 2; i++){
+                if (Gdx.input.isTouched(i)) {
+                    if(Gdx.input.getX(i) >= 500){
+                        System.out.println("gdx.x on " + i + " = " + Gdx.input.getX(i));
+                        return true;
+                    }
+                }
+            }
         }
         return false;
     }
