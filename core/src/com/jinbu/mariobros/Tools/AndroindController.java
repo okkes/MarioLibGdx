@@ -37,6 +37,7 @@ public class AndroindController extends InputHandler{
 
     @Override
     public boolean upIsPressed() {
+        //TODO: While holding the jump button, when you walk around, you will start of with jumping before you walk. Fix this bug
         if(Gdx.input.justTouched()){
             for(int i = 0; i < 2; i++){
                 if (Gdx.input.isTouched(i)) {

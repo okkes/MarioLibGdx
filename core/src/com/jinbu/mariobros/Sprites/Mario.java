@@ -3,6 +3,7 @@ package com.jinbu.mariobros.Sprites;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.jinbu.mariobros.Screens.PlayScreen;
 
@@ -29,11 +30,27 @@ public class Mario extends Sprite{
 
         // the first param is the texture we want to get.
         marioStand = new TextureRegion(getTexture(), 0, 10, 16, 16);
+        //marioStand = new TextureRegion(getTexture(), 0, 0, 0, 0);// todo: temporary to hide the sprite.
         setBounds(0, 0, 16 / PPM, 16 / PPM);
         setRegion(marioStand);
     }
 
     private void defineMario(){
+        defineBody();
+        defineFeet();
+    }
+
+    private void defineFeet(){
+        FixtureDef fdef = new FixtureDef();
+        EdgeShape feet = new EdgeShape();
+        feet.set(new Vector2(-6 / PPM, -7 / PPM), new Vector2(6 / PPM, -7 / PPM));
+        fdef.shape = feet;
+        //fdef.friction = 0.5f;
+        fdef.isSensor = false;
+        b2body.createFixture(fdef);
+    }
+
+    private void defineBody(){
         BodyDef bdef = new BodyDef();
         bdef.position.set(32 / PPM, 32 / PPM); // temp
         bdef.type = BodyDef.BodyType.DynamicBody;
@@ -41,13 +58,12 @@ public class Mario extends Sprite{
 
         FixtureDef fdef = new FixtureDef();
         // we need to create a circle shape
-        CircleShape shape = new CircleShape();
+//        CircleShape shape = new CircleShape();
         PolygonShape shape2 = new PolygonShape();
-        shape2.setAsBox(6 / PPM, 6 / PPM);
-        shape.setRadius(6 / PPM);
-
+        shape2.setAsBox(5 / PPM, 6 / PPM);
+//        shape.setRadius(5 / PPM);
+        //fdef.density = -2; todo: make it slide less
         fdef.shape = shape2;
-
         b2body.createFixture(fdef);
     }
 

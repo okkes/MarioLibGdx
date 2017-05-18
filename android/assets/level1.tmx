@@ -16,9 +16,6 @@
  <objectgroup name="ground">
   <object id="3" x="0" y="192" width="912" height="16"/>
   <object id="4" x="1008" y="192" width="160" height="16"/>
-  <object id="56" x="1089.5" y="-45.5">
-   <ellipse/>
-  </object>
  </objectgroup>
  <objectgroup name="stairs">
   <object id="52" x="768" y="128">

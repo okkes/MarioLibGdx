@@ -147,7 +147,9 @@ public class PlayScreen implements Screen {
         // The if statement ensures the camera follows the player only within the world. This
         // prevents the black screen you get at the start of the game.
         if(player.b2body.getPosition().x >= MarioBros.V_WIDTH / 2 / PPM) {
-            gameCam.position.x = player.b2body.getPosition().x;
+            if(player.b2body.getPosition().x >= gameCam.position.x){
+                gameCam.position.x = player.b2body.getPosition().x;
+            }
         }
         // follow mario on the x
         //gameCam.position.x = player.b2body.getPosition().x;
@@ -177,6 +179,7 @@ public class PlayScreen implements Screen {
         if(controller.leftIsPressed() && player.b2body.getLinearVelocity().x >= -2){
             player.b2body.applyLinearImpulse(new Vector2(-0.1f, 0), player.b2body.getWorldCenter(), true);
         }
+        //System.out.println("body velocity = " + player.b2body.getLinearVelocity().y);
     }
 
     //todo: check if this fixes the android bugs.
