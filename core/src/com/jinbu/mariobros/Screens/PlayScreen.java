@@ -133,6 +133,25 @@ public class PlayScreen implements Screen {
         hud.stage.draw();
     }
 
+    private void updateCamera(){
+        // Don't follow the player when he is close to the edges of the map.
+        // This prevents the camera from showing outside the map.
+        float leftEdgeScreenScaled = MarioBros.V_WIDTH / 2 / PPM;
+        if(player.b2body.getPosition().x <= leftEdgeScreenScaled){
+            return;
+        }
+
+        //todo: add the right edge as well.
+
+        // Check if the player walks to the left. If so, don't follow
+        if(player.b2body.getPosition().x <= gameCam.position.x){
+            return;
+        }
+
+        // update camera.
+        gameCam.position.x = player.b2body.getPosition().x;
+    }
+
     public void update(float delta){
         handleInput(delta);
 
@@ -144,13 +163,7 @@ public class PlayScreen implements Screen {
 
         player.update(delta);
 
-        // The if statement ensures the camera follows the player only within the world. This
-        // prevents the black screen you get at the start of the game.
-        if(player.b2body.getPosition().x >= MarioBros.V_WIDTH / 2 / PPM) {
-            if(player.b2body.getPosition().x >= gameCam.position.x){
-                gameCam.position.x = player.b2body.getPosition().x;
-            }
-        }
+        updateCamera();
         // follow mario on the x
         //gameCam.position.x = player.b2body.getPosition().x;
 

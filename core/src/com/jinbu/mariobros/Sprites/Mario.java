@@ -45,7 +45,7 @@ public class Mario extends Sprite{
         EdgeShape feet = new EdgeShape();
         feet.set(new Vector2(-6 / PPM, -7 / PPM), new Vector2(6 / PPM, -7 / PPM));
         fdef.shape = feet;
-        //fdef.friction = 0.5f;
+        fdef.friction = 0.5f;
         fdef.isSensor = false;
         b2body.createFixture(fdef);
     }
@@ -60,7 +60,7 @@ public class Mario extends Sprite{
         // we need to create a circle shape
 //        CircleShape shape = new CircleShape();
         PolygonShape shape2 = new PolygonShape();
-        shape2.setAsBox(5 / PPM, 6 / PPM);
+        shape2.setAsBox(6 / PPM, 6 / PPM);
 //        shape.setRadius(5 / PPM);
         //fdef.density = -2; todo: make it slide less
         fdef.shape = shape2;
