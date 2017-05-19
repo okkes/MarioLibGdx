@@ -137,19 +137,19 @@ public class PlayScreen implements Screen {
         // Don't follow the player when he is close to the edges of the map.
         // This prevents the camera from showing outside the map.
         float leftEdgeScreenScaled = MarioBros.V_WIDTH / 2 / PPM;
-        if(player.b2body.getPosition().x <= leftEdgeScreenScaled){
+        if(player.getPositionX()<= leftEdgeScreenScaled){
             return;
         }
 
         //todo: add the right edge as well.
 
         // Check if the player walks to the left. If so, don't follow
-        if(player.b2body.getPosition().x <= gameCam.position.x){
+        if(player.getPositionX() <= gameCam.position.x){
             return;
         }
 
         // update camera.
-        gameCam.position.x = player.b2body.getPosition().x;
+        gameCam.position.x = player.getPositionX();
     }
 
     public void update(float delta){
@@ -177,22 +177,17 @@ public class PlayScreen implements Screen {
     private void handleInput(float delta){
         // There are two ways to move an object in box2d. you can use force which is gradual increase or decrease in speed
         // Or you could use inpulse, which is an imediate change in speed
-        if(controller.upIsPressed() && player.b2body.getLinearVelocity().y == 0){
-            // Do we want to impulse it to x or y direction. you can do that by sending the vector.
-            // You can tell the box2d where to apply this inpulse/vorce to the body. By applying directly to the center of the body
-            // it won't for example spin.
-            // The final parameter is to wake the body up, otherwise it won't move.
-            player.b2body.applyLinearImpulse(new Vector2(0, 4f), player.b2body.getWorldCenter(), true);
+        if(controller.upIsPressed()){
+            player.jump();
         }
 
-        if(controller.rightIsPressed() && player.b2body.getLinearVelocity().x <= 2){
-            player.b2body.applyLinearImpulse(new Vector2(0.1f, 0), player.b2body.getWorldCenter(), true);
+        if(controller.rightIsPressed()){
+            player.moveToRight(controller.sprintIsPressed());
         }
 
-        if(controller.leftIsPressed() && player.b2body.getLinearVelocity().x >= -2){
-            player.b2body.applyLinearImpulse(new Vector2(-0.1f, 0), player.b2body.getWorldCenter(), true);
+        if(controller.leftIsPressed()){
+            player.moveToLeft(controller.sprintIsPressed());
         }
-        //System.out.println("body velocity = " + player.b2body.getLinearVelocity().y);
     }
 
     //todo: check if this fixes the android bugs.

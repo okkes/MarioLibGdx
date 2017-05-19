@@ -50,4 +50,10 @@ public class AndroindController extends InputHandler{
         }
         return false;
     }
+
+    @Override
+    public boolean sprintIsPressed() {
+        return false;
+        ///todo: add sprint for android
+    }
 }

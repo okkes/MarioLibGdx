@@ -9,25 +9,21 @@ import com.badlogic.gdx.Input;
 public class DesktopController extends InputHandler {
     @Override
     public boolean leftIsPressed() {
-        if(Gdx.input.isKeyPressed(Input.Keys.LEFT)){
-            return true;
-        }
-        return false;
+        return Gdx.input.isKeyPressed(Input.Keys.LEFT);
     }
 
     @Override
     public boolean rightIsPressed() {
-        if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
-            return true;
-        }
-        return false;
+         return Gdx.input.isKeyPressed(Input.Keys.RIGHT);
     }
 
     @Override
     public boolean upIsPressed() {
-        if(Gdx.input.isKeyJustPressed(Input.Keys.UP)){
-            return true;
-        }
-        return false;
+        return Gdx.input.isKeyJustPressed(Input.Keys.X);
+    }
+
+    @Override
+    public boolean sprintIsPressed() {
+        return Gdx.input.isKeyPressed(Input.Keys.Z);
     }
 }

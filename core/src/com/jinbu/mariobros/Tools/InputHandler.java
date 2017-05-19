@@ -7,4 +7,5 @@ public abstract class InputHandler {
     public abstract boolean leftIsPressed();
     public abstract boolean rightIsPressed();
     public abstract boolean upIsPressed();
+    public abstract boolean sprintIsPressed();
 }
