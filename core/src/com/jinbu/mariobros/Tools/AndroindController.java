@@ -36,24 +36,33 @@ public class AndroindController extends InputHandler{
     }
 
     @Override
-    public boolean upIsPressed() {
+    public boolean sprintIsPressed() {
         //TODO: While holding the jump button, when you walk around, you will start of with jumping before you walk. Fix this bug
-        if(Gdx.input.justTouched()){
+//        if(Gdx.input.justTouched()){
             for(int i = 0; i < 2; i++){
                 if (Gdx.input.isTouched(i)) {
-                    if(Gdx.input.getX(i) >= 500){
+                    if(Gdx.input.getX(i) >= 500 && Gdx.input.getX(i) <= 1750){
                         System.out.println("gdx.x on " + i + " = " + Gdx.input.getX(i));
                         return true;
                     }
                 }
             }
-        }
+//        }
         return false;
     }
 
     @Override
-    public boolean sprintIsPressed() {
+    public boolean jumpIsPressed() {
+        //TODO: While holding the jump button, when you walk around, you will start of with jumping before you walk. Fix this bug
+        for(int i = 0; i < 2; i++){
+            if (Gdx.input.isTouched(i) && Gdx.input.getX(i) >= 1800) {
+                System.out.println("gdx.x on " + i + " = " + Gdx.input.getX(i));
+                return true;
+            }
+            else{
+                System.out.println("gdx.x on " + i + " = " + Gdx.input.getX(i));
+            }
+        }
         return false;
-        ///todo: add sprint for android
     }
 }

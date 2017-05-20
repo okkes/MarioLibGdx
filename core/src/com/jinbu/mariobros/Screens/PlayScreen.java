@@ -173,7 +173,7 @@ public class PlayScreen implements Screen {
     private void handleInput(float delta){
         // There are two ways to move an object in box2d. you can use force which is gradual increase or decrease in speed
         // Or you could use inpulse, which is an imediate change in speed
-        if(controller.upIsPressed()){
+        if(controller.jumpIsPressed()){
             player.jump();
         }
 
@@ -183,10 +183,14 @@ public class PlayScreen implements Screen {
 
         if(controller.leftIsPressed()){
             // Update the wall first to prevent the player from walking out of the screen.
-            wall.update(gameCam.position.x - (MarioBros.V_WIDTH / 2 / PPM));
+            wall.update(getLeftEdgeOfScreen());
 
             player.moveToLeft(controller.sprintIsPressed());
         }
+    }
+
+    private float getLeftEdgeOfScreen(){
+        return gameCam.position.x - (MarioBros.V_WIDTH / 2 / PPM);
     }
 
     //todo: check if this fixes the android bugs.

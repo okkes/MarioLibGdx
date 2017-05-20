@@ -12,18 +12,18 @@ import static com.jinbu.mariobros.MarioBros.PPM;
  * Created by 15049051 on 07/05/2017.
  */
 public class Mario extends Sprite{
-    private final int NOT_IN_AIR = 0;
-    private final float JUMP_VELOCITY = 4f;
 
-    private final float MAX_RUN_VELOCITY_TO_RIGHT = 2f;
-    private final float MAX_RUN_VELOCITY_TO_LEFT = -2f;
+    private final int NOT_IN_AIR                    = 0;
+    private final float JUMP_VELOCITY               = 4f;
 
-    private final float MAX_WALK_VELOCITY_TO_RIGHT = 0.8f;
-    private final float MAX_WALK_VELOCITY_TO_LEFT = -0.8f;
+    private final float MAX_RUN_VELOCITY_TO_RIGHT   = 2f;
+    private final float MAX_RUN_VELOCITY_TO_LEFT    = -2f;
 
-    private final float MOVEMENT_SPEED_RIGHT = 0.1f;
-    private final float MOVEMENT_SPEED_LEFT = -0.1f;
-    private final PlayScreen screen;
+    private final float MAX_WALK_VELOCITY_TO_RIGHT  = 0.8f;
+    private final float MAX_WALK_VELOCITY_TO_LEFT   = -0.8f;
+
+    private final float MOVEMENT_SPEED_RIGHT        = 0.1f;
+    private final float MOVEMENT_SPEED_LEFT         = -0.1f;
 
     // the world that mario is going to live in.
     private World world;
@@ -33,28 +33,30 @@ public class Mario extends Sprite{
     // get the individuel texture of mario standing still
     private TextureRegion marioStand;
 
-    private final Vector2 WalkToLeftVelocity;
-    private final Vector2 walkToRightVelocity;
-    private final Vector2 jumpVelocity;
+    private Vector2 walkToLeftVelocity;
+    private Vector2 walkToRightVelocity;
+    private Vector2 jumpVelocity;
 
     public Mario(World world, PlayScreen screen){
         // make a call to super, which is a sprite class and it can take a textureregion that we can manupulate later.
         super(screen.getAtlas().findRegion("little_mario"));
 
         this.world  = world;
-        this.screen = screen;
-
-        WalkToLeftVelocity  = new Vector2(MOVEMENT_SPEED_LEFT, 0);
-        walkToRightVelocity = new Vector2(MOVEMENT_SPEED_RIGHT, 0);
-        jumpVelocity        = new Vector2(0, JUMP_VELOCITY);
 
         defineMario();
     }
 
     private void defineMario(){
+        defineMovementVelocities();
         createBody();
         createFeetForBody();
         addFixtureToBody();
+    }
+
+    private void defineMovementVelocities(){
+        walkToLeftVelocity  = new Vector2(MOVEMENT_SPEED_LEFT, 0);
+        walkToRightVelocity = new Vector2(MOVEMENT_SPEED_RIGHT, 0);
+        jumpVelocity        = new Vector2(0, JUMP_VELOCITY);
     }
 
     public float getPositionX(){
@@ -85,13 +87,15 @@ public class Mario extends Sprite{
         bdef.type = BodyDef.BodyType.DynamicBody;
         b2body = world.createBody(bdef);
 
-        FixtureDef fdef = new FixtureDef();
-        // we need to create a circle shape
+//        we need to create a circle shape
 //        CircleShape shape = new CircleShape();
-        PolygonShape shape2 = new PolygonShape();
-        shape2.setAsBox(6 / PPM, 6 / PPM);
 //        shape.setRadius(5 / PPM);
-        fdef.shape = shape2;
+
+        FixtureDef fdef = new FixtureDef();
+        PolygonShape shape = new PolygonShape();
+        shape.setAsBox(6 / PPM, 6 / PPM);
+
+        fdef.shape = shape;
         b2body.createFixture(fdef);
     }
 
@@ -101,10 +105,8 @@ public class Mario extends Sprite{
 
     public void jump() {
         if(b2body.getLinearVelocity().y == NOT_IN_AIR){
-            // Do we want to impulse it to x or y direction. you can do that by sending the vector.
-            // You can tell the box2d where to apply this inpulse/vorce to the body. By applying directly to the center of the body
-            // it won't for example spin.
-            // The final parameter is to wake the body up, otherwise it won't move.
+            // By applying the impulse to the center of the body, the body wont spin/rotate.
+            // The last parameter is set to true to wake the body up when applying the impulse. The bodies are sleeping by default.
             b2body.applyLinearImpulse(jumpVelocity, b2body.getWorldCenter(), true);
         }
     }
@@ -133,11 +135,7 @@ public class Mario extends Sprite{
         }
 
         if(move){
-            b2body.applyLinearImpulse(WalkToLeftVelocity, b2body.getWorldCenter(), true);
+            b2body.applyLinearImpulse(walkToLeftVelocity, b2body.getWorldCenter(), true);
         }
-    }
-
-    public void stop() {
-        b2body.applyLinearImpulse(new Vector2(0,0), b2body.getWorldCenter(), true);
     }
 }

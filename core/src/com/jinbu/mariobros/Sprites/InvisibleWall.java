@@ -11,9 +11,10 @@ import static com.jinbu.mariobros.MarioBros.PPM;
  * Created by 15049051 on 20/05/2017.
  */
 public class InvisibleWall {
+    private final float LOCATION_Y  = 1 / PPM;
+    private final float WALL_WIDTH  = 2 / PPM;
+
     private Body b2body;
-    private final float LOCATION_Y          = 1 / PPM;
-    private final float WALL_WIDTH          = 2 / PPM;
 
     public InvisibleWall(World world){
         BodyDef bdef    = new BodyDef();
