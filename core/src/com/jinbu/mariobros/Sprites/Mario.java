@@ -50,18 +50,6 @@ public class Mario extends Sprite{
         return b2body.getPosition().x;
     }
 
-    public float getPositionY(){
-        return b2body.getPosition().y;
-    }
-
-    public float getLinearVelocityX(){
-        return b2body.getLinearVelocity().x;
-    }
-
-    public float getLinearVelocityY(){
-        return b2body.getLinearVelocity().y;
-    }
-
     private void addFixtureToBody(){
         // the first param is the texture we want to get.
         marioStand = new TextureRegion(getTexture(), 0, 10, 16, 16);
@@ -75,7 +63,7 @@ public class Mario extends Sprite{
         EdgeShape feet = new EdgeShape();
         feet.set(new Vector2(-6 / PPM, -7 / PPM), new Vector2(6 / PPM, -7 / PPM));
         fdef.shape = feet;
-        fdef.friction = 0.5f;
+        fdef.friction = 0.5f; //todo: adding friction causes buggy vertical velocity sometimes.
         fdef.isSensor = false;
         b2body.createFixture(fdef);
     }
@@ -118,7 +106,7 @@ public class Mario extends Sprite{
         else if (b2body.getLinearVelocity().x <= MAX_WALK_VELOCITY_TO_RIGHT){
             move = true;
         }
-        System.out.println(b2body.getLinearVelocity().x);
+
         if(move){
             b2body.applyLinearImpulse(new Vector2(MOVEMENT_SPEED_RIGHT, 0), b2body.getWorldCenter(), true);
         }
@@ -136,13 +124,5 @@ public class Mario extends Sprite{
         if(move){
             b2body.applyLinearImpulse(new Vector2(MOVEMENT_SPEED_LEFT, 0), b2body.getWorldCenter(), true);
         }
-    }
-
-    public void runToRight(){
-
-    }
-
-    public void runToLeft(){
-
     }
 }

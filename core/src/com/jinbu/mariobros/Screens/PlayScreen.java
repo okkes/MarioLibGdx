@@ -1,19 +1,13 @@
 package com.jinbu.mariobros.Screens;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.maps.MapObject;
-import com.badlogic.gdx.maps.objects.PolygonMapObject;
-import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.math.Polygon;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -22,7 +16,6 @@ import com.jinbu.mariobros.Levels.Level1;
 import com.jinbu.mariobros.MarioBros;
 import com.jinbu.mariobros.Scenes.Hud;
 import com.jinbu.mariobros.Sprites.Mario;
-import com.jinbu.mariobros.Tools.B2WorldCreator;
 import com.jinbu.mariobros.Tools.InputHandler;
 
 import static com.jinbu.mariobros.MarioBros.PPM;
@@ -137,7 +130,7 @@ public class PlayScreen implements Screen {
         // Don't follow the player when he is close to the edges of the map.
         // This prevents the camera from showing outside the map.
         float leftEdgeScreenScaled = MarioBros.V_WIDTH / 2 / PPM;
-        if(player.getPositionX()<= leftEdgeScreenScaled){
+        if(player.getPositionX() <= leftEdgeScreenScaled){
             return;
         }
 
