@@ -15,6 +15,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.jinbu.mariobros.Levels.Level1;
 import com.jinbu.mariobros.MarioBros;
 import com.jinbu.mariobros.Scenes.Hud;
+import com.jinbu.mariobros.Sprites.InvisibleWall;
 import com.jinbu.mariobros.Sprites.Mario;
 import com.jinbu.mariobros.Tools.InputHandler;
 
@@ -25,6 +26,7 @@ import static com.jinbu.mariobros.MarioBros.PPM;
  */
 public class PlayScreen implements Screen {
     private final InputHandler  controller;
+    private InvisibleWall wall;
 
     private MarioBros           game;
     private TextureAtlas        atlas;
@@ -88,6 +90,7 @@ public class PlayScreen implements Screen {
         Level1 level = new Level1(map, world);
 
         player = new Mario(this.world, this);
+        wall = new InvisibleWall(this.world);
     }
 
     public TextureAtlas getAtlas(){
@@ -179,6 +182,9 @@ public class PlayScreen implements Screen {
         }
 
         if(controller.leftIsPressed()){
+            // Update the wall first to prevent the player from walking out of the screen.
+            wall.update(gameCam.position.x - (MarioBros.V_WIDTH / 2 / PPM));
+
             player.moveToLeft(controller.sprintIsPressed());
         }
     }
