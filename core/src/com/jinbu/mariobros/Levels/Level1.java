@@ -14,7 +14,8 @@ import static com.jinbu.mariobros.MarioBros.PPM;
  * Created by 15049051 on 14/05/2017.
  */
 public class Level1{
-
+    public static final int MARIO_SPAWN_X = 32;
+    public static final int MARIO_SPAWN_Y = 32;
 
     public Level1(TiledMap map, World world) {
         // todo: for now we are initialising the map in the playscreen class. this code will probably move here.

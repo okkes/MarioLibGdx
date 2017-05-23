@@ -106,23 +106,38 @@ public class PlayScreen implements Screen {
     public void render(float delta) {
         update(delta);
 
+        clearScreen();
+
+        renderMap();
+        renderBatch();
+        renderHud();
+    }
+
+    private void clearScreen(){
         // Set screen color to black
         Gdx.gl.glClearColor(0, 0, 0, 1);
 
         // Clear screen
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+    }
 
+    private void renderMap(){
         // render the maprenderer after clearing the screen.
         mapRenderer.render();
 
         b2dr.render(world, gameCam.combined);
+    }
 
+    private void renderBatch(){
         // main cam when we run around
         game.batch.setProjectionMatrix(gameCam.combined);
+
         game.batch.begin();
         player.draw(game.batch);
         game.batch.end();
+    }
 
+    private void renderHud(){
         // render only what the camera can see rather than everything
         game.batch.setProjectionMatrix(hud.stage.getCamera().combined);
 
@@ -146,6 +161,9 @@ public class PlayScreen implements Screen {
 
         // update camera.
         gameCam.position.x = player.getPositionX();
+
+        // Always update the camera anytime it moves.
+        gameCam.update();
     }
 
     public void update(float delta){
@@ -160,11 +178,6 @@ public class PlayScreen implements Screen {
         player.update(delta);
 
         updateCamera();
-        // follow mario on the x
-        //gameCam.position.x = player.b2body.getPosition().x;
-
-        // Always update the camera anytime it moves.
-        gameCam.update();
 
         // let the maprenderer know what it needs to render
         mapRenderer.setView(gameCam);

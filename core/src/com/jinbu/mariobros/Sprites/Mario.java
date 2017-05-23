@@ -4,8 +4,10 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
+import com.jinbu.mariobros.Levels.Level1;
 import com.jinbu.mariobros.Screens.PlayScreen;
 
+import static com.badlogic.gdx.math.MathUtils.round;
 import static com.jinbu.mariobros.MarioBros.PPM;
 
 /**
@@ -14,7 +16,7 @@ import static com.jinbu.mariobros.MarioBros.PPM;
 public class Mario extends Sprite{
 
     private final int NOT_IN_AIR                    = 0;
-    private final float JUMP_VELOCITY               = 4f;
+    private final float JUMP_VELOCITY               = 3.7f;
 
     private final float MAX_RUN_VELOCITY_TO_RIGHT   = 2f;
     private final float MAX_RUN_VELOCITY_TO_LEFT    = -2f;
@@ -25,13 +27,30 @@ public class Mario extends Sprite{
     private final float MOVEMENT_SPEED_RIGHT        = 0.1f;
     private final float MOVEMENT_SPEED_LEFT         = -0.1f;
 
+    private float yAxesBefore;
+    private float yAxesAfter;
+    private float xAxesBefore;
+    private float xAxesAfter;
+    private STATE state;
+    private STATE previousState;
+
+    public enum STATE{
+        JUMPING,
+        FALLING,
+        STANDING,
+        WALKING,
+        CROUCHING,
+        DEAD
+    }
+
     // the world that mario is going to live in.
     private World world;
 
-    private Body b2body;
+    public Body b2body; // todo: temporary public. change it to private
 
     // get the individuel texture of mario standing still
     private TextureRegion marioStand;
+    private TextureRegion marioJump;
 
     private Vector2 walkToLeftVelocity;
     private Vector2 walkToRightVelocity;
@@ -51,6 +70,17 @@ public class Mario extends Sprite{
         createBody();
         createFeetForBody();
         addFixtureToBody();
+        defineState();
+    }
+
+    private void defineState(){
+        state = STATE.STANDING;
+
+        xAxesBefore = b2body.getPosition().x;
+        xAxesAfter = b2body.getPosition().x;
+
+        yAxesBefore = b2body.getPosition().y;
+        yAxesAfter = b2body.getPosition().y;
     }
 
     private void defineMovementVelocities(){
@@ -66,6 +96,7 @@ public class Mario extends Sprite{
     private void addFixtureToBody(){
         // the first param is the texture we want to get.
         marioStand = new TextureRegion(getTexture(), 0, 10, 16, 16);
+        marioJump = new TextureRegion(getTexture(), 82, 10, 16, 16 );
 
         setBounds(0, 0, 16 / PPM, 16 / PPM);
         setRegion(marioStand);
@@ -100,7 +131,70 @@ public class Mario extends Sprite{
     }
 
     public void update(float dt){
+        if(state == STATE.DEAD){
+            return;
+        }
+
+        updateState();
+        updateTexture();
         setPosition(b2body.getPosition().x - getWidth() / 1.8f, b2body.getPosition().y - getHeight() / 2);
+    }
+
+    private void updateTexture(){
+        switch(state){
+            case JUMPING:
+                setRegion(marioJump);
+                break;
+            case STANDING:
+                setRegion(marioStand);
+                break;
+        }
+    }
+
+    public static float round2(float number, int digit) {
+        int pow = 10;
+        for (int i = 1; i < digit; i++)
+            pow *= 10;
+        float tmp = number * pow;
+        return (float) (int) ((tmp - (int) tmp) >= 0.5f ? tmp + 1 : tmp) / pow;
+    }
+
+    private void updateState(){
+        xAxesBefore = xAxesAfter;
+        xAxesAfter = b2body.getPosition().x;
+
+        yAxesBefore = yAxesAfter;
+        yAxesAfter = b2body.getPosition().y;
+
+        if(xAxesBefore < xAxesAfter){
+            //System.out.println("Walking to right");
+        }
+
+        if(xAxesBefore > xAxesAfter){
+            //System.out.println("wWalking to left");
+        }
+
+        if(round2(yAxesBefore, 2) != round2(yAxesAfter, 2)){
+            if(yAxesBefore < yAxesAfter){
+                System.out.println("Jumping, ybefore = " + yAxesBefore + " and yafter = " + yAxesAfter);
+                state = STATE.JUMPING;
+            }
+
+            if(yAxesBefore > yAxesAfter){
+                System.out.println("Falling, ybefore = " + yAxesBefore + " and yafter = " + yAxesAfter);
+                state = STATE.FALLING;
+            }
+        }
+        else if(round2(yAxesBefore, 3) == round2(yAxesAfter, 3)){
+            state = STATE.STANDING;
+        }
+        else if(yAxesAfter < 0){
+            state = STATE.DEAD;
+        }
+    }
+
+    public STATE getState(){
+        return state;
     }
 
     public void jump() {
