@@ -26,21 +26,24 @@ public class MarioBros extends Game {
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
-        InputHandler controller;
+
+
+		// By passing this game class to the screen, the screen class can set another screen by himself.
+		setScreen(new PlayScreen(this, getController()));
+	}
+
+	private InputHandler getController(){
+		InputHandler controller;
 		switch(Gdx.app.getType()) {
 			case Android:
 				controller = new AndroindController();
 				break;
 			case Desktop:
+			default:
 				controller = new DesktopController();
 				break;
-            default:
-                System.out.println("Unknown device found. Desktop controller is loaded.");
-                controller = new DesktopController();
 		}
-
-		// By passing this game class to the screen, the screen class can set another screen by himself.
-		setScreen(new PlayScreen(this, controller));
+		return controller;
 	}
 
 	@Override

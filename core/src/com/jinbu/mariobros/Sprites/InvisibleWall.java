@@ -23,6 +23,7 @@ public class InvisibleWall {
         b2body          = world.createBody(bdef);
 
         FixtureDef fdef = new FixtureDef();
+        fdef.friction = 0;
         PolygonShape shape = new PolygonShape();
         // multiply the height by two to prevent mario from jumping over the wall via high obstacles.
         shape.setAsBox(WALL_WIDTH, MarioBros.V_HEIGHT / PPM * 2);

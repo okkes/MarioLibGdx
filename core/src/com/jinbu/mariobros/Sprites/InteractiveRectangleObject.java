@@ -20,7 +20,7 @@ public abstract class InteractiveRectangleObject {
     protected Rectangle bounds;
     protected Body body;
 
-    public InteractiveRectangleObject(World world, TiledMap map, MapObject object){
+    public InteractiveRectangleObject(World world, TiledMap map, MapObject object, float friction){
         this.world  = world;
         this.map    = map;
         this.bounds = ((RectangleMapObject)object).getRectangle();
@@ -29,6 +29,7 @@ public abstract class InteractiveRectangleObject {
         FixtureDef fdef     = new FixtureDef();
         PolygonShape shape  = new PolygonShape();
 
+        fdef.friction   = friction;
         bdef.type       = BodyDef.BodyType.StaticBody;
 
         float xScaled   = (bounds.getX() + bounds.getWidth() / 2) / PPM;
