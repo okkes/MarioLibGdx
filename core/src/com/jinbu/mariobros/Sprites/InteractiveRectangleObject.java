@@ -30,6 +30,7 @@ public abstract class InteractiveRectangleObject {
         PolygonShape shape  = new PolygonShape();
 
         fdef.friction   = friction;
+        fdef.restitution = 0;
         bdef.type       = BodyDef.BodyType.StaticBody;
 
         float xScaled   = (bounds.getX() + bounds.getWidth() / 2) / PPM;

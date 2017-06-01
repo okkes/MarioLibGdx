@@ -60,8 +60,8 @@ public class Mario extends Sprite{
     private Vector2 walkToRightVelocity;
     private Vector2 jumpVelocity;
 
-    private float velocityY;
-    private float velocityX;
+    private float positionY;
+    private float positionX;
 
     private STATE state;
     private DIRECTION direction;
@@ -159,8 +159,8 @@ public class Mario extends Sprite{
         state       = STATE.STANDING;
         direction   = DIRECTION.RIGHT;
         stateTimer  = 0;
-        velocityX   = 0;
-        velocityY   = 0;
+        positionX = 0;
+        positionY = 0;
     }
 
     public float getPositionX(){
@@ -171,8 +171,10 @@ public class Mario extends Sprite{
         updateState();
         updateTexture();
         setPosition(b2body.getPosition().x - getWidth() / 1.7f, b2body.getPosition().y - getHeight() / 2);
+//        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) b = !b;
+//        if(b)System.out.println(b2body.getLinearVelocity().x);
     }
-
+//    private boolean b = true;
     private float calculateStateTimer(STATE oldState){
         // reset stateTimer since the state has changed.
         if(oldState != state) return 0;
@@ -203,7 +205,10 @@ public class Mario extends Sprite{
 
         if(direction == DIRECTION.LEFT && !region.isFlipX()){
             region.flip(true, false);
+//            System.out.println("Direction = " + direction + ", and region is flipped: " + region.isFlipX());
+//            System.out.println(b2body.getLinearVelocity().x < 0);
         } else if(direction == DIRECTION.RIGHT && region.isFlipX()){
+//            System.out.println("Direction = " + direction + ", and region is flipped: " + region.isFlipX());
             region.flip(true, false);
         }
 
@@ -230,42 +235,31 @@ public class Mario extends Sprite{
             return; // todo: not sure if the return statement is permanent.
         }
 
-        float oldVelocityX  = velocityX;
-        velocityX           = b2body.getPosition().x;
+        float velocityX = b2body.getLinearVelocity().x;
+        float velocityY = b2body.getLinearVelocity().y;
+        STATE oldState  = state;
 
-        float oldVelocityY  = velocityY;
-        velocityY           = b2body.getPosition().y;
+        // update jump state
+        if(velocityY > 0 ||  (velocityY < 0 && state == STATE.JUMPING)){
+            state = STATE.JUMPING;
+        }else if(velocityY < 0){
+            state = STATE.FALLING;
+        }else {
+            //todo: Probably temporary. Set the stand state when the actual collision occurs
+            state = STATE.STANDING;
+        }
 
-        STATE oldState          = state;
-
-        if(round2(oldVelocityY, 2) != round2(velocityY, 2)){
-            if(oldVelocityY < velocityY){
-                state = STATE.JUMPING;
+        // update movement animation
+        if(state != STATE.JUMPING && state != STATE.FALLING) {
+            if(velocityX > 0) {
+                direction   = DIRECTION.RIGHT;
+                state       = STATE.WALKING;
+            }else if (velocityX < 0) {
+                direction   = DIRECTION.LEFT;
+                state       = STATE.WALKING;
             }else{
-                // When mario is falling after jumping, keep the jumping animation.
-                if(oldState != STATE.JUMPING){
-                    state = STATE.FALLING;
-                }
+                state       = STATE.STANDING;
             }
-        }
-        //todo: temporary. Replace the next if statement by collision detection
-        else if(round2(oldVelocityY, 3) == round2(velocityY, 3)){
-            state = STATE.STANDING;
-        }
-
-        if(round2(oldVelocityX, 3) != round2(velocityX, 3)) {
-            // todo: the jumping animation combined with direction needs improvement.
-            if(oldVelocityX < velocityX && state != STATE.JUMPING){
-                direction = DIRECTION.RIGHT;
-            } else if(state != STATE.JUMPING){
-                direction = DIRECTION.LEFT;
-            }
-
-            if(state != STATE.JUMPING && state != STATE.FALLING){
-                state = STATE.WALKING;
-            }
-        } else if(state != STATE.JUMPING && state != STATE.FALLING){
-            state = STATE.STANDING;
         }
 
         stateTimer = calculateStateTimer(oldState);
