@@ -29,7 +29,8 @@ public class Mario extends Sprite{
     // TODO: END TEMP CODE
     public enum STATE{
         JUMPING,
-        FALLING,
+        JUMP_FALLING,
+        WALK_FALLING,
         STANDING,
         WALKING,
         CROUCHING,
@@ -42,7 +43,8 @@ public class Mario extends Sprite{
     }
 
     private final int NOT_IN_AIR                    = 0;
-    private final float JUMP_VELOCITY               = 3.7f;
+//    private final float JUMP_VELOCITY               = 3.7f;
+    private final float JUMP_VELOCITY               = 3.5f;
 
     private final float MAX_RUN_VELOCITY_TO_RIGHT   = 2f;
     private final float MAX_WALK_VELOCITY_TO_RIGHT  = 0.7f;
@@ -59,9 +61,6 @@ public class Mario extends Sprite{
     private Vector2 walkToLeftVelocity;
     private Vector2 walkToRightVelocity;
     private Vector2 jumpVelocity;
-
-    private float positionY;
-    private float positionX;
 
     private STATE state;
     private DIRECTION direction;
@@ -107,7 +106,6 @@ public class Mario extends Sprite{
         bdef.type = BodyDef.BodyType.DynamicBody;
         //bdef.linearDamping = 1f;//todo: playing with it. intention is to create air resistance/friction.
         b2body = world.createBody(bdef);
-
 //        we need to create a circle shape
 //        CircleShape shape = new CircleShape();
 //        shape.setRadius(5 / PPM);
@@ -127,9 +125,9 @@ public class Mario extends Sprite{
     private void createFeetForBody(){
         FixtureDef fdef = new FixtureDef();
         EdgeShape feet = new EdgeShape();
-        feet.set(new Vector2(-6 / PPM, -7 / PPM), new Vector2(6 / PPM, -7 / PPM));
+        feet.set(new Vector2(-7 / PPM, -7 / PPM), new Vector2(7 / PPM, -7 / PPM));
         fdef.shape = feet;
-        //fdef.friction = 0.5f; //todo: adding friction causes buggy vertical velocity sometimes.
+//        fdef.friction = 0.5f; //todo: adding friction causes buggy vertical velocity sometimes.
         fdef.isSensor = false;
         b2body.createFixture(fdef);
     }
@@ -159,8 +157,6 @@ public class Mario extends Sprite{
         state       = STATE.STANDING;
         direction   = DIRECTION.RIGHT;
         stateTimer  = 0;
-        positionX = 0;
-        positionY = 0;
     }
 
     public float getPositionX(){
@@ -171,15 +167,18 @@ public class Mario extends Sprite{
         updateState();
         updateTexture();
         setPosition(b2body.getPosition().x - getWidth() / 1.7f, b2body.getPosition().y - getHeight() / 2);
-//        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) b = !b;
-//        if(b)System.out.println(b2body.getLinearVelocity().x);
+        //todo sout
     }
-//    private boolean b = true;
-    private float calculateStateTimer(STATE oldState){
-        // reset stateTimer since the state has changed.
-        if(oldState != state) return 0;
 
-        return stateTimer + (abs(b2body.getLinearVelocity().x) / 100 * 5f);
+    private float calculateStateTimer(STATE oldState){
+        // The action changed. Reset the timer.
+        if(oldState!= state){
+            return 0;
+        }
+        // Increase the stateTimer according to the speed of the body
+        else{
+            return stateTimer + (abs(b2body.getLinearVelocity().x) / 100 * 5f);
+        }
     }
 
     private void updateTexture(){
@@ -187,6 +186,7 @@ public class Mario extends Sprite{
 
         switch(state){
             case JUMPING:
+            case JUMP_FALLING:
                 region = marioJump;
                 break;
             case STANDING:
@@ -194,9 +194,9 @@ public class Mario extends Sprite{
                 break;
             case WALKING:
                 region      = marioRun.getKeyFrame(stateTimer, true);
-                marioFall   = marioRun.getKeyFrame(stateTimer, false);
+                marioFall   = marioRun.getKeyFrame(stateTimer, false); // todo: check how true works
                 break;
-            case FALLING:
+            case WALK_FALLING:
                 region = marioFall;
                 break;
             default:
@@ -205,10 +205,7 @@ public class Mario extends Sprite{
 
         if(direction == DIRECTION.LEFT && !region.isFlipX()){
             region.flip(true, false);
-//            System.out.println("Direction = " + direction + ", and region is flipped: " + region.isFlipX());
-//            System.out.println(b2body.getLinearVelocity().x < 0);
         } else if(direction == DIRECTION.RIGHT && region.isFlipX()){
-//            System.out.println("Direction = " + direction + ", and region is flipped: " + region.isFlipX());
             region.flip(true, false);
         }
 
@@ -222,6 +219,7 @@ public class Mario extends Sprite{
      * @return return the rounded float number.
      */
     public static float round2(float number, int digit) {
+        //todo for now its not needed anymore. delete it later perhaps?
         int pow = 10;
         for (int i = 1; i < digit; i++)
             pow *= 10;
@@ -230,6 +228,7 @@ public class Mario extends Sprite{
     }
 
     private void updateState(){
+        // return if player is dead
         if(b2body.getPosition().y < 0){
             state = STATE.DEAD;
             return; // todo: not sure if the return statement is permanent.
@@ -240,17 +239,19 @@ public class Mario extends Sprite{
         STATE oldState  = state;
 
         // update jump state
-        if(velocityY > 0 ||  (velocityY < 0 && state == STATE.JUMPING)){
+        if(velocityY > 0 ){
             state = STATE.JUMPING;
-        }else if(velocityY < 0){
-            state = STATE.FALLING;
-        }else {
+        }else if(state == STATE.JUMPING && velocityY < 0){
+            state = STATE.JUMP_FALLING;
+        }else if((state == STATE.WALKING || state == STATE.STANDING) && velocityY < 0){
+            state = STATE.WALK_FALLING;
+        }else if(velocityY == 0 && (state == STATE.WALK_FALLING || state == STATE.JUMP_FALLING)){
             //todo: Probably temporary. Set the stand state when the actual collision occurs
             state = STATE.STANDING;
         }
 
         // update movement animation
-        if(state != STATE.JUMPING && state != STATE.FALLING) {
+        if(state == STATE.WALKING || state == STATE.STANDING) {
             if(velocityX > 0) {
                 direction   = DIRECTION.RIGHT;
                 state       = STATE.WALKING;
@@ -262,17 +263,73 @@ public class Mario extends Sprite{
             }
         }
 
+        // update state timer
         stateTimer = calculateStateTimer(oldState);
     }
-
-    public void jump() {
+    private boolean jumpAllowed = false;
+    private float startYLocation = 0;
+    private boolean stoppedHoldingJumpButton = true;
+    private boolean count = false;
+    public void jump(boolean jumpIsPressed) {
         if(state == STATE.DEAD)return;
 
-        if(b2body.getLinearVelocity().y == NOT_IN_AIR){
-            // By applying the impulse to the center of the body, the body wont spin/rotate.
-            // The last parameter is set to true to wake the body up when applying the impulse. The bodies are sleeping by default.
-            b2body.applyLinearImpulse(jumpVelocity, b2body.getWorldCenter(), true);
+        boolean marioOnAPlatform    = state == STATE.STANDING || state == STATE.WALKING;
+        float currentYLocation      = b2body.getPosition().y;
+
+        if(!jumpIsPressed){
+
+            stoppedHoldingJumpButton = marioOnAPlatform;
+            if((currentYLocation - startYLocation) / startYLocation * 100 >= 25){
+                b2body.setGravityScale(1);
+            }
+            return;
         }
+        System.out.println("c/s y location = " + currentYLocation + ", " + startYLocation);
+
+        boolean jumpIsReady         = jumpIsPressed && stoppedHoldingJumpButton;
+        boolean jumpingFromPlatform = marioOnAPlatform && jumpIsReady;
+
+        if(jumpingFromPlatform){
+            jumpAllowed                 = true;
+            startYLocation              = currentYLocation;
+            stoppedHoldingJumpButton    = false;
+            count = true;
+            //todo: One way to set the fixture dynamically to 0 in order to keep the x speed after landing
+            for(Fixture fixture : b2body.getFixtureList()){
+                System.out.println(fixture.getFriction());
+                fixture.setFriction(0);
+            }
+//            b2body.setGravityScale(0f);
+        }else {
+            boolean risingInAir         = b2body.getLinearVelocity().y > 0 && state == STATE.JUMPING;
+            boolean withinMaxJumpHeight = currentYLocation - startYLocation < 0.45f;
+            boolean withinMaxJumpSpeed  = b2body.getLinearVelocity().y < 3.5f; // todo: soon probably redundant
+            boolean continuesJumping    = risingInAir && withinMaxJumpHeight && withinMaxJumpSpeed;
+            jumpAllowed                 = continuesJumping;
+            if(jumpAllowed) {
+//                System.out.println("y velocity: " + b2body.getLinearVelocity().y);
+            }
+        }
+
+        if(jumpAllowed){
+//            jumpVelocity.add(0, 4f);
+//            b2body.applyLinearImpulse(jumpVelocity, b2body.getWorldCenter(), true);
+            if(count) {
+                b2body.setGravityScale(0);
+                b2body.applyLinearImpulse(new Vector2(0, 2.2f), b2body.getWorldCenter(), true);
+//            System.out.println("y velocity: " + b2body.getLinearVelocity().y);
+                count = false;
+            }
+
+        }else{
+            if((currentYLocation - startYLocation) / startYLocation * 100 >= 25){
+                b2body.setGravityScale(1);
+            }
+        }
+    }
+
+    private Vector2 calculateJumpVelocity(){
+        return null;
     }
 
     public void moveToRight(boolean isRunning) {

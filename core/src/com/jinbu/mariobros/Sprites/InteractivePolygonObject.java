@@ -19,13 +19,14 @@ public abstract class InteractivePolygonObject {
     protected float vertices[];
     protected Body body;
 
-    public InteractivePolygonObject(World world, TiledMap map, MapObject object){
+    public InteractivePolygonObject(World world, TiledMap map, MapObject object, float friction){
         this.map = map;
         this.world = world;
         this.vertices = ((PolygonMapObject) object).getPolygon().getTransformedVertices();
 
         BodyDef bdef        = new BodyDef();
         FixtureDef fdef     = new FixtureDef();
+        fdef.friction       = friction;
         ChainShape shape    = new ChainShape();
 
         for (int x = 0; x < vertices.length; x++) {

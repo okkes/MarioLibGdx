@@ -19,7 +19,7 @@ public class DesktopController extends InputHandler {
 
     @Override
     public boolean jumpIsPressed() {
-        return Gdx.input.isKeyJustPressed(Input.Keys.X);
+        return Gdx.input.isKeyPressed(Input.Keys.X);
     }
 
     @Override

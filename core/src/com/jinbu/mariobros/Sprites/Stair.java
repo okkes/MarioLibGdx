@@ -14,6 +14,6 @@ public class Stair extends InteractivePolygonObject{
     public final static Class<PolygonMapObject> TYPE = PolygonMapObject.class; // TODO: move to super?, make it more dynamic?
 
     public Stair (World world, TiledMap map, MapObject object){
-        super(world, map, object);
+        super(world, map, object, 0);
     }
 }

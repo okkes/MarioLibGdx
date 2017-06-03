@@ -83,7 +83,7 @@ public class PlayScreen implements Screen {
 
         // Vector2 is used for gravity and the second parameter (true) makes the object go to sleep
         // Box2d doesnt calculate inside his physics simulation the bodies that are sleeping. this saves some time
-        world = new World(new Vector2(0, -10), true);
+        world = new World(new Vector2(0, -13), true);
 
         b2dr = new Box2DDebugRenderer();
 
@@ -186,9 +186,7 @@ public class PlayScreen implements Screen {
     private void handleInput(float delta){
         // There are two ways to move an object in box2d. you can use force which is gradual increase or decrease in speed
         // Or you could use inpulse, which is an imediate change in speed
-        if(controller.jumpIsPressed()){
-            player.jump();
-        }
+        player.jump(controller.jumpIsPressed());
 
         if(controller.rightIsPressed()){
             player.moveToRight(controller.sprintIsPressed());
