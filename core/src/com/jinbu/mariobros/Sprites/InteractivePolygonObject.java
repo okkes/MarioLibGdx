@@ -12,12 +12,13 @@ import static com.jinbu.mariobros.MarioBros.PPM;
 /**
  * Created by 15049051 on 14/05/2017.
  */
-public abstract class InteractivePolygonObject {
+public abstract class InteractivePolygonObject extends InteractiveTileObject {
     protected World world;
     protected TiledMap map;
     protected TiledMapTile tile;
     protected float vertices[];
     protected Body body;
+    protected Fixture fixture;
 
     public InteractivePolygonObject(World world, TiledMap map, MapObject object, float friction){
         this.map = map;
@@ -41,6 +42,6 @@ public abstract class InteractivePolygonObject {
         fdef.shape = shape;
 
         //add fixture to the body
-        body.createFixture(fdef);
+        fixture = body.createFixture(fdef);
     }
 }

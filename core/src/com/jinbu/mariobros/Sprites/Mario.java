@@ -6,9 +6,10 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
+import com.jinbu.mariobros.MarioBros;
 import com.jinbu.mariobros.Screens.PlayScreen;
 
-import static com.jinbu.mariobros.MarioBros.PPM;
+import static com.jinbu.mariobros.MarioBros.*;
 import static java.lang.Math.abs;
 
 /**
@@ -114,8 +115,20 @@ public class Mario extends Sprite{
         PolygonShape shape = new PolygonShape();
         shape.setAsBox(6 / PPM, 6 / PPM);
 
+        // what is this filter
+        fdef.filter.categoryBits = MarioBros.MARIO_BIT;
+
+        // what can this filter collide with
+        fdef.filter.maskBits = DEFAULT_BIT | COIN_BIT | BRICK_BIT;
+
         fdef.shape = shape;
         b2body.createFixture(fdef);
+
+        EdgeShape head = new EdgeShape(); // edgeshape is a line between two different points
+        head.set(new Vector2(-2 / PPM, 6 / PPM), new Vector2(2 / PPM, 6 / PPM));
+        fdef.shape = head;
+        fdef.isSensor = true;
+        b2body.createFixture(fdef).setUserData("head");
     }
 
     /**
@@ -124,17 +137,30 @@ public class Mario extends Sprite{
      */
     private void createFeetForBody(){
         FixtureDef fdef = new FixtureDef();
+        // what is this filter
+        fdef.filter.categoryBits = MarioBros.MARIO_BIT;
+
+        // what can this filter collide with
+        fdef.filter.maskBits = DEFAULT_BIT | COIN_BIT | BRICK_BIT;
+
         EdgeShape feet = new EdgeShape();
         feet.set(new Vector2(-7 / PPM, -7 / PPM), new Vector2(7 / PPM, -7 / PPM));
         fdef.shape = feet;
 //        fdef.friction = 0.5f; //todo: adding friction causes buggy vertical velocity sometimes.
-        fdef.isSensor = false;
+        fdef.isSensor = false; // todo: it seems like the sensor is false by default.
         b2body.createFixture(fdef);
+
+        EdgeShape feetSensor = new EdgeShape();
+        feetSensor.set(new Vector2(-7 / PPM, -7 / PPM), new Vector2(7 / PPM, -7 / PPM));
+        fdef.shape = feet;
+        fdef.isSensor = true;
+        b2body.createFixture(fdef).setUserData("feet");
     }
 
     private void defineTexture(){
-        marioStand = new TextureRegion(getTexture(), 0, 10, 16, 17);
-        marioJump = new TextureRegion(getTexture(), 82, 10, 16, 17);
+        marioStand = new TextureRegion(getTexture(), 0, 10, 16, 16);
+//        marioStand = new TextureRegion(getTexture(), 0, 0, 0, 0);
+        marioJump = new TextureRegion(getTexture(), 82, 10, 16, 16);
         marioFall = marioStand;
 
         // init the run animation
@@ -279,12 +305,12 @@ public class Mario extends Sprite{
         if(!jumpIsPressed){
 
             stoppedHoldingJumpButton = marioOnAPlatform;
-            if((currentYLocation - startYLocation) / startYLocation * 100 >= 25){
+            if((currentYLocation - startYLocation) / startYLocation * 100 >= 25 || state != STATE.JUMPING){
                 b2body.setGravityScale(1);
             }
             return;
         }
-        System.out.println("c/s y location = " + currentYLocation + ", " + startYLocation);
+//        System.out.println("c/s y location = " + currentYLocation + ", " + startYLocation);
 
         boolean jumpIsReady         = jumpIsPressed && stoppedHoldingJumpButton;
         boolean jumpingFromPlatform = marioOnAPlatform && jumpIsReady;
@@ -296,8 +322,8 @@ public class Mario extends Sprite{
             count = true;
             //todo: One way to set the fixture dynamically to 0 in order to keep the x speed after landing
             for(Fixture fixture : b2body.getFixtureList()){
-                System.out.println(fixture.getFriction());
-                fixture.setFriction(0);
+//                System.out.println(fixture.getFriction());
+//                fixture.setFriction(0);
             }
 //            b2body.setGravityScale(0f);
         }else {
@@ -322,7 +348,7 @@ public class Mario extends Sprite{
             }
 
         }else{
-            if((currentYLocation - startYLocation) / startYLocation * 100 >= 25){
+            if((currentYLocation - startYLocation) / startYLocation * 100 >= 25 || state != STATE.JUMPING){
                 b2body.setGravityScale(1);
             }
         }

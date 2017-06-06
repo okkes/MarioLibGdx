@@ -1,5 +1,6 @@
 package com.jinbu.mariobros.Sprites;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -14,5 +15,11 @@ public class Ground extends InteractiveRectangleObject {
 
     public Ground(World world, TiledMap map, MapObject object) {
         super(world, map, object, 0.5f);
+        super.fixture.setUserData(this);
+    }
+
+    @Override
+    public void sensorCollision() {
+        Gdx.app.log(LAYER_NAME, "Collision");
     }
 }

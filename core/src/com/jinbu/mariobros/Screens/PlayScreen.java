@@ -18,6 +18,7 @@ import com.jinbu.mariobros.Scenes.Hud;
 import com.jinbu.mariobros.Sprites.InvisibleWall;
 import com.jinbu.mariobros.Sprites.Mario;
 import com.jinbu.mariobros.Tools.InputHandler;
+import com.jinbu.mariobros.Tools.WorldContactListener;
 
 import static com.jinbu.mariobros.MarioBros.PPM;
 
@@ -91,6 +92,8 @@ public class PlayScreen implements Screen {
 
         player = new Mario(this.world, this);
         wall = new InvisibleWall(this.world);
+
+        world.setContactListener(new WorldContactListener());
     }
 
     public TextureAtlas getAtlas(){

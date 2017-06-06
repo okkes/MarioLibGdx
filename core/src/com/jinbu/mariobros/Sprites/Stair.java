@@ -1,5 +1,6 @@
 package com.jinbu.mariobros.Sprites;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.PolygonMapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
@@ -15,5 +16,11 @@ public class Stair extends InteractivePolygonObject{
 
     public Stair (World world, TiledMap map, MapObject object){
         super(world, map, object, 0);
+        super.fixture.setUserData(this);
+    }
+
+    @Override
+    public void sensorCollision() {
+        Gdx.app.log(LAYER_NAME, "Collision");
     }
 }
