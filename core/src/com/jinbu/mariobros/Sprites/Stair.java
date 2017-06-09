@@ -20,7 +20,7 @@ public class Stair extends InteractivePolygonObject{
     }
 
     @Override
-    public void sensorCollision() {
+    public void collisionOccured(Object object, int filterBit) {
         Gdx.app.log(LAYER_NAME, "Collision");
     }
 }

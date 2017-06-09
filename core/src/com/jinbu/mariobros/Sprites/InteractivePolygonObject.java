@@ -12,7 +12,7 @@ import static com.jinbu.mariobros.MarioBros.PPM;
 /**
  * Created by 15049051 on 14/05/2017.
  */
-public abstract class InteractivePolygonObject extends InteractiveTileObject {
+public abstract class InteractivePolygonObject implements InteractiveTileObject {
     protected World world;
     protected TiledMap map;
     protected TiledMapTile tile;
@@ -25,14 +25,16 @@ public abstract class InteractivePolygonObject extends InteractiveTileObject {
         this.world = world;
         this.vertices = ((PolygonMapObject) object).getPolygon().getTransformedVertices();
 
-        BodyDef bdef        = new BodyDef();
-        FixtureDef fdef     = new FixtureDef();
-        fdef.friction       = friction;
-        ChainShape shape    = new ChainShape();
-
         for (int x = 0; x < vertices.length; x++) {
             vertices[x] /= PPM;
         }
+
+        BodyDef bdef        = new BodyDef();
+        FixtureDef fdef     = new FixtureDef();
+        if(friction != 0){
+            fdef.friction       = friction;
+        }
+        ChainShape shape    = new ChainShape();
 
         shape.createChain(vertices);
         bdef.position.set(0, 0);

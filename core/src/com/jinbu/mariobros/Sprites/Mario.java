@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
-import com.jinbu.mariobros.MarioBros;
 import com.jinbu.mariobros.Screens.PlayScreen;
 
 import static com.jinbu.mariobros.MarioBros.*;
@@ -15,7 +14,8 @@ import static java.lang.Math.abs;
 /**
  * Created by 15049051 on 07/05/2017.
  */
-public class Mario extends Sprite{
+public class Mario extends Sprite implements InteractiveTileObject{
+
     //TODO: TEMPORARY CODE
     public enum States{FALLING, JUMPING, STANDING, RUNNING};
     public States CurrentState;
@@ -43,8 +43,6 @@ public class Mario extends Sprite{
         RIGHT
     }
 
-    private final int NOT_IN_AIR                    = 0;
-//    private final float JUMP_VELOCITY               = 3.7f;
     private final float JUMP_VELOCITY               = 3.5f;
 
     private final float MAX_RUN_VELOCITY_TO_RIGHT   = 2f;
@@ -78,6 +76,8 @@ public class Mario extends Sprite{
     // The physical body of mario that will be used in the physics world.
     private Body b2body; // todo: temporary public. change it to private
 
+    private boolean onPlatform;
+
     public Mario(World world, PlayScreen screen){
         // make a call to super, which is a sprite class and it can take a textureregion that we can manupulate later.
         super(screen.getAtlas().findRegion("little_mario"));
@@ -102,33 +102,34 @@ public class Mario extends Sprite{
     }
 
     private void createBody(){
+        // Create the body
         BodyDef bdef = new BodyDef();
         bdef.position.set(32 / PPM, 32 / PPM); // temp
         bdef.type = BodyDef.BodyType.DynamicBody;
-        //bdef.linearDamping = 1f;//todo: playing with it. intention is to create air resistance/friction.
         b2body = world.createBody(bdef);
 //        we need to create a circle shape
 //        CircleShape shape = new CircleShape();
 //        shape.setRadius(5 / PPM);
 
-        FixtureDef fdef = new FixtureDef();
+        // Attach the fixture to the body
         PolygonShape shape = new PolygonShape();
-        shape.setAsBox(6 / PPM, 6 / PPM);
+        shape.setAsBox(5 / PPM, 5 / PPM);
 
-        // what is this filter
-        fdef.filter.categoryBits = MarioBros.MARIO_BIT;
+        FixtureDef fdef             = new FixtureDef();
+        fdef.shape                  = shape;
+        fdef.filter.categoryBits    = MARIO_BIT;
+        fdef.filter.maskBits        = DEFAULT_BIT | COIN_BIT | BRICK_BIT;
 
-        // what can this filter collide with
-        fdef.filter.maskBits = DEFAULT_BIT | COIN_BIT | BRICK_BIT;
+        b2body.createFixture(fdef).setUserData(this);
 
-        fdef.shape = shape;
-        b2body.createFixture(fdef);
+        // Attach the head fixture to the body
+        EdgeShape headShape = new EdgeShape();
+        headShape.set(new Vector2(-4 / PPM, 5 / PPM), new Vector2(4 / PPM, 5 / PPM));
 
-        EdgeShape head = new EdgeShape(); // edgeshape is a line between two different points
-        head.set(new Vector2(-2 / PPM, 6 / PPM), new Vector2(2 / PPM, 6 / PPM));
-        fdef.shape = head;
+        fdef.shape = headShape;
         fdef.isSensor = true;
-        b2body.createFixture(fdef).setUserData("head");
+        fdef.filter.categoryBits = MARIO_HEAD_BIT;
+        b2body.createFixture(fdef).setUserData(this);
     }
 
     /**
@@ -136,37 +137,27 @@ public class Mario extends Sprite{
      * walks over many bodies close to each other (for example the blocks).
      */
     private void createFeetForBody(){
-        FixtureDef fdef = new FixtureDef();
-        // what is this filter
-        fdef.filter.categoryBits = MarioBros.MARIO_BIT;
+        EdgeShape feetShape         = new EdgeShape();
+        feetShape.set(new Vector2(-5.5f / PPM, -7 / PPM), new Vector2(5.5f/ PPM, -7 / PPM));
 
-        // what can this filter collide with
-        fdef.filter.maskBits = DEFAULT_BIT | COIN_BIT | BRICK_BIT;
-
-        EdgeShape feet = new EdgeShape();
-        feet.set(new Vector2(-7 / PPM, -7 / PPM), new Vector2(7 / PPM, -7 / PPM));
-        fdef.shape = feet;
-//        fdef.friction = 0.5f; //todo: adding friction causes buggy vertical velocity sometimes.
-        fdef.isSensor = false; // todo: it seems like the sensor is false by default.
-        b2body.createFixture(fdef);
-
-        EdgeShape feetSensor = new EdgeShape();
-        feetSensor.set(new Vector2(-7 / PPM, -7 / PPM), new Vector2(7 / PPM, -7 / PPM));
-        fdef.shape = feet;
-        fdef.isSensor = true;
-        b2body.createFixture(fdef).setUserData("feet");
+        FixtureDef fdef             = new FixtureDef();
+        fdef.shape                  = feetShape;
+        fdef.filter.categoryBits    = MARIO_FEET_BIT;
+        fdef.filter.maskBits        = DEFAULT_BIT | COIN_BIT | BRICK_BIT;
+        fdef.friction               = 0.5f;
+        fdef.isSensor               = false;
+        b2body.createFixture(fdef).setUserData(this);
     }
 
     private void defineTexture(){
-        marioStand = new TextureRegion(getTexture(), 0, 10, 16, 16);
-//        marioStand = new TextureRegion(getTexture(), 0, 0, 0, 0);
-        marioJump = new TextureRegion(getTexture(), 82, 10, 16, 16);
-        marioFall = marioStand;
+        marioStand  = new TextureRegion(getTexture(), 0, 11, 16, 16);
+        marioJump   = new TextureRegion(getTexture(), 80, 11, 17, 16);
+        marioFall   = marioStand;
 
         // init the run animation
         Array<TextureRegion> frames = new Array<TextureRegion>();
         for (int i = 1; i < 4 ; i++) {
-            frames.add(new TextureRegion(getTexture(), i * 16, 10, 16, 17));
+            frames.add(new TextureRegion(getTexture(), i * 16, 11, 16, 16));
         }
 
         marioRun = new Animation<TextureRegion>(RUN_ANIMATION_CHANGE_FRAME, frames);
@@ -183,6 +174,7 @@ public class Mario extends Sprite{
         state       = STATE.STANDING;
         direction   = DIRECTION.RIGHT;
         stateTimer  = 0;
+        onPlatform  = true;
     }
 
     public float getPositionX(){
@@ -194,6 +186,7 @@ public class Mario extends Sprite{
         updateTexture();
         setPosition(b2body.getPosition().x - getWidth() / 1.7f, b2body.getPosition().y - getHeight() / 2);
         //todo sout
+        System.out.println("state: " + state );
     }
 
     private float calculateStateTimer(STATE oldState){
@@ -264,6 +257,14 @@ public class Mario extends Sprite{
         float velocityY = b2body.getLinearVelocity().y;
         STATE oldState  = state;
 
+        if(velocityY < 0){
+            onPlatform = false;
+        }else if(onPlatform && velocityX == 0){
+            state = STATE.STANDING;
+        }else if(onPlatform && velocityX != 0){
+            state = STATE.WALKING;
+        }
+
         // update jump state
         if(velocityY > 0 ){
             state = STATE.JUMPING;
@@ -271,9 +272,6 @@ public class Mario extends Sprite{
             state = STATE.JUMP_FALLING;
         }else if((state == STATE.WALKING || state == STATE.STANDING) && velocityY < 0){
             state = STATE.WALK_FALLING;
-        }else if(velocityY == 0 && (state == STATE.WALK_FALLING || state == STATE.JUMP_FALLING)){
-            //todo: Probably temporary. Set the stand state when the actual collision occurs
-            state = STATE.STANDING;
         }
 
         // update movement animation
@@ -284,73 +282,72 @@ public class Mario extends Sprite{
             }else if (velocityX < 0) {
                 direction   = DIRECTION.LEFT;
                 state       = STATE.WALKING;
-            }else{
-                state       = STATE.STANDING;
+            }
+        }
+
+        if(state == STATE.WALK_FALLING || state == STATE.JUMPING || state == STATE.JUMP_FALLING){
+            if(!noFriction){
+                if(b2body.getLinearVelocity().x > 0.5f){
+                    for(Fixture fixture : b2body.getFixtureList()) {
+                        //fixture.setFriction(0);
+                    }
+                }
+            }
+        }else if(noFriction){
+            for(Fixture fixture : b2body.getFixtureList()){
+                if(fixture.getFilterData().categoryBits == MARIO_FEET_BIT){
+                    //fixture.setFriction(0.5f);
+                }else{
+                    //fixture.setFriction(0.2f);
+                }
             }
         }
 
         // update state timer
         stateTimer = calculateStateTimer(oldState);
     }
-    private boolean jumpAllowed = false;
-    private float startYLocation = 0;
-    private boolean stoppedHoldingJumpButton = true;
-    private boolean count = false;
+
+    private boolean noFriction = false;
+
+    private float startLocationY = 0;
+    private boolean jumpInterrupted = false;
+    private boolean jumpButtonReady = false;
+    private boolean jumpButtonHolding = false;
     public void jump(boolean jumpIsPressed) {
         if(state == STATE.DEAD)return;
 
-        boolean marioOnAPlatform    = state == STATE.STANDING || state == STATE.WALKING;
-        float currentYLocation      = b2body.getPosition().y;
+        boolean marioOnAPlatform    = state == STATE.STANDING || state == STATE.WALKING || onPlatform;
+        if(!jumpButtonReady) {
+            jumpButtonReady = marioOnAPlatform && !jumpIsPressed;
+        }else if(jumpButtonReady && state == STATE.WALK_FALLING){
+            jumpButtonReady = false;
+        }
 
         if(!jumpIsPressed){
-
-            stoppedHoldingJumpButton = marioOnAPlatform;
-            if((currentYLocation - startYLocation) / startYLocation * 100 >= 25 || state != STATE.JUMPING){
-                b2body.setGravityScale(1);
-            }
+            jumpButtonHolding = false;
             return;
         }
-//        System.out.println("c/s y location = " + currentYLocation + ", " + startYLocation);
 
-        boolean jumpIsReady         = jumpIsPressed && stoppedHoldingJumpButton;
-        boolean jumpingFromPlatform = marioOnAPlatform && jumpIsReady;
+        boolean jump = false;
+        float currentLocationY = b2body.getPosition().y;
 
+        boolean jumpingFromPlatform = jumpButtonReady && jumpIsPressed;
         if(jumpingFromPlatform){
-            jumpAllowed                 = true;
-            startYLocation              = currentYLocation;
-            stoppedHoldingJumpButton    = false;
-            count = true;
-            //todo: One way to set the fixture dynamically to 0 in order to keep the x speed after landing
-            for(Fixture fixture : b2body.getFixtureList()){
-//                System.out.println(fixture.getFriction());
-//                fixture.setFriction(0);
-            }
-//            b2body.setGravityScale(0f);
+            jump                = true;
+            startLocationY      = currentLocationY;
+            jumpButtonReady     = false;
+            jumpButtonHolding   = true;
+            jumpInterrupted     = false;
         }else {
-            boolean risingInAir         = b2body.getLinearVelocity().y > 0 && state == STATE.JUMPING;
-            boolean withinMaxJumpHeight = currentYLocation - startYLocation < 0.45f;
-            boolean withinMaxJumpSpeed  = b2body.getLinearVelocity().y < 3.5f; // todo: soon probably redundant
-            boolean continuesJumping    = risingInAir && withinMaxJumpHeight && withinMaxJumpSpeed;
-            jumpAllowed                 = continuesJumping;
-            if(jumpAllowed) {
-//                System.out.println("y velocity: " + b2body.getLinearVelocity().y);
-            }
+            boolean risingInAir         = state == STATE.JUMPING;
+            boolean withinMaxJumpHeight = currentLocationY - startLocationY < 0.5f;
+            boolean withinMaxJumpSpeed  = b2body.getLinearVelocity().y <= 2f; // todo: soon probably redundant
+            jump    = risingInAir && withinMaxJumpHeight && withinMaxJumpSpeed && !jumpInterrupted && jumpButtonHolding;
         }
 
-        if(jumpAllowed){
-//            jumpVelocity.add(0, 4f);
-//            b2body.applyLinearImpulse(jumpVelocity, b2body.getWorldCenter(), true);
-            if(count) {
-                b2body.setGravityScale(0);
-                b2body.applyLinearImpulse(new Vector2(0, 2.2f), b2body.getWorldCenter(), true);
-//            System.out.println("y velocity: " + b2body.getLinearVelocity().y);
-                count = false;
-            }
-
-        }else{
-            if((currentYLocation - startYLocation) / startYLocation * 100 >= 25 || state != STATE.JUMPING){
-                b2body.setGravityScale(1);
-            }
+        if(jump) {
+            onPlatform = false;
+            b2body.applyLinearImpulse(new Vector2(0, 2.1f - b2body.getLinearVelocity().y), b2body.getWorldCenter(), true);
         }
     }
 
@@ -393,4 +390,22 @@ public class Mario extends Sprite{
             b2body.applyLinearImpulse(walkToLeftVelocity, b2body.getWorldCenter(), true);
         }
     }
+
+    @Override
+    public void collisionOccured(Object object, int filterBit) {
+        System.out.println("filterbid: " + filterBit);
+        switch(filterBit){
+            case MARIO_FEET_BIT | DEFAULT_BIT:
+            case MARIO_FEET_BIT | BRICK_BIT:
+            case MARIO_FEET_BIT | COIN_BIT:
+                onPlatform = true;
+                break;
+            case MARIO_HEAD_BIT | DEFAULT_BIT:
+            case MARIO_HEAD_BIT | BRICK_BIT:
+            case MARIO_HEAD_BIT | COIN_BIT:
+                jumpInterrupted = true;
+                break;
+        }
+    }
+
 }

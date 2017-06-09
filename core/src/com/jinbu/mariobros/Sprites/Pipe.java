@@ -19,7 +19,7 @@ public class Pipe extends InteractiveRectangleObject {
     }
 
     @Override
-    public void sensorCollision() {
-        Gdx.app.log(LAYER_NAME, "Collision");
+    public void collisionOccured(Object object, int filterBit) {
+//        Gdx.app.log(LAYER_NAME, "Collision");
     }
 }

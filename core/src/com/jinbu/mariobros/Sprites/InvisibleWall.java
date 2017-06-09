@@ -10,7 +10,7 @@ import static com.jinbu.mariobros.MarioBros.PPM;
 /**
  * Created by 15049051 on 20/05/2017.
  */
-public class InvisibleWall {
+public class InvisibleWall implements InteractiveTileObject {
     private final float LOCATION_Y  = 1 / PPM;
     private final float WALL_WIDTH  = 2 / PPM;
 
@@ -28,10 +28,15 @@ public class InvisibleWall {
         // multiply the height by two to prevent mario from jumping over the wall via high obstacles.
         shape.setAsBox(WALL_WIDTH, MarioBros.V_HEIGHT / PPM * 2);
         fdef.shape = shape;
-        b2body.createFixture(fdef);
+        b2body.createFixture(fdef).setUserData(this);
     }
 
     public void update(float location) {
         b2body.setTransform(location - WALL_WIDTH, LOCATION_Y, 0);
+    }
+
+    @Override
+    public void collisionOccured(Object object, int filterBit) {
+        // do nothing
     }
 }

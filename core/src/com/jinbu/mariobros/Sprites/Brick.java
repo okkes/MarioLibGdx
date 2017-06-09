@@ -1,14 +1,11 @@
 package com.jinbu.mariobros.Sprites;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.physics.box2d.World;
 
-import static com.jinbu.mariobros.MarioBros.BRICK_BIT;
-import static com.jinbu.mariobros.MarioBros.COIN_BIT;
-import static com.jinbu.mariobros.MarioBros.DESTROYED_BIT;
+import static com.jinbu.mariobros.MarioBros.*;
 
 /**
  * Created by 15049051 on 14/05/2017.
@@ -23,9 +20,19 @@ public class Brick extends InteractiveRectangleObject {
         setCategoryFIlter(BRICK_BIT);
     }
 
+//    @Override
+//    public void sensorCollision() {
+//        setCategoryFIlter(DESTROYED_BIT);
+//        getCell().setTile(null);
+//    }
+
     @Override
-    public void sensorCollision() {
-        setCategoryFIlter(DESTROYED_BIT);
-        getCell().setTile(null);
+    public void collisionOccured(Object object, int filterBit) {
+        switch(filterBit){
+            case BRICK_BIT | MARIO_HEAD_BIT:
+                setCategoryFIlter(DESTROYED_BIT);
+                getCell().setTile(null);
+                break;
+        }
     }
 }

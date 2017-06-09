@@ -84,7 +84,7 @@ public class PlayScreen implements Screen {
 
         // Vector2 is used for gravity and the second parameter (true) makes the object go to sleep
         // Box2d doesnt calculate inside his physics simulation the bodies that are sleeping. this saves some time
-        world = new World(new Vector2(0, -13), true);
+        world = new World(new Vector2(0, -11.5f), true);
 
         b2dr = new Box2DDebugRenderer();
 
@@ -176,7 +176,7 @@ public class PlayScreen implements Screen {
         // velocity and position iterations effects how two bodies react during the collision, the higher the number,
         // the preciser but longer the calculation takes.
         // takes 1 step in the physics simulation (60 times per second)
-        world.step(1/60f, 6, 2);
+        world.step(1/60f, 6, 10);
 
         player.update(delta);
 

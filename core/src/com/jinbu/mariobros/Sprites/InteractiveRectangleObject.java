@@ -13,7 +13,7 @@ import static com.jinbu.mariobros.MarioBros.PPM;
 /**
  * Created by 15049051 on 14/05/2017.
  */
-public abstract class InteractiveRectangleObject extends InteractiveTileObject {
+public abstract class InteractiveRectangleObject implements InteractiveTileObject {
 
     protected Fixture fixture;
     protected World world;
@@ -34,7 +34,9 @@ public abstract class InteractiveRectangleObject extends InteractiveTileObject {
         FixtureDef fdef     = new FixtureDef();
         PolygonShape shape  = new PolygonShape();
 
-        fdef.friction       = friction;
+        if(friction != 0){
+            fdef.friction       = friction;
+        }
         fdef.restitution    = 0;
         bdef.type           = BodyDef.BodyType.StaticBody;
 

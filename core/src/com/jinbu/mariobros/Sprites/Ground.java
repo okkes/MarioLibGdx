@@ -14,12 +14,12 @@ public class Ground extends InteractiveRectangleObject {
     public final static Class<RectangleMapObject> TYPE = RectangleMapObject.class; // TODO: move to super?, make it more dynamic?
 
     public Ground(World world, TiledMap map, MapObject object) {
-        super(world, map, object, 0.5f);
+        super(world, map, object, 0);
         super.fixture.setUserData(this);
     }
 
     @Override
-    public void sensorCollision() {
-        Gdx.app.log(LAYER_NAME, "Collision");
+    public void collisionOccured(Object object, int filterBit) {
+//        Gdx.app.log(LAYER_NAME, "Collision");
     }
 }
