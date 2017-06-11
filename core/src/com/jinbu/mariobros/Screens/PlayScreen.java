@@ -176,7 +176,7 @@ public class PlayScreen implements Screen {
         // velocity and position iterations effects how two bodies react during the collision, the higher the number,
         // the preciser but longer the calculation takes.
         // takes 1 step in the physics simulation (60 times per second)
-        world.step(1/60f, 6, 10);
+        world.step(1/60f, 6, 2);
 
         player.update(delta);
 

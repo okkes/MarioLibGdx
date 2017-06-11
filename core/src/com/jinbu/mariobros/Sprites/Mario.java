@@ -61,7 +61,7 @@ public class Mario extends Sprite implements InteractiveTileObject{
     private Vector2 walkToRightVelocity;
     private Vector2 jumpVelocity;
 
-    private STATE state;
+    public STATE state;
     private DIRECTION direction;
 
     // get the individuel texture of mario standing still
@@ -74,7 +74,7 @@ public class Mario extends Sprite implements InteractiveTileObject{
     private World world;
 
     // The physical body of mario that will be used in the physics world.
-    private Body b2body; // todo: temporary public. change it to private
+    public Body b2body; // todo: temporary public. change it to private
 
     private boolean onPlatform;
 
@@ -124,7 +124,7 @@ public class Mario extends Sprite implements InteractiveTileObject{
 
         // Attach the head fixture to the body
         EdgeShape headShape = new EdgeShape();
-        headShape.set(new Vector2(-4 / PPM, 5 / PPM), new Vector2(4 / PPM, 5 / PPM));
+        headShape.set(new Vector2(-3 / PPM, 5 / PPM), new Vector2(3 / PPM, 5 / PPM));
 
         fdef.shape = headShape;
         fdef.isSensor = true;
@@ -147,6 +147,13 @@ public class Mario extends Sprite implements InteractiveTileObject{
         fdef.friction               = 0.5f;
         fdef.isSensor               = false;
         b2body.createFixture(fdef).setUserData(this);
+
+//        EdgeShape feetSensor = new EdgeShape();
+//        feetSensor.set(new Vector2( -5f / PPM, -7.5f / PPM), new Vector2(5f / PPM, -7.5f / PPM));
+//        fdef.shape = feetShape;
+//        fdef.filter.categoryBits = MARIO_FEET_BIT;
+//        fdef.isSensor = true;
+//        b2body.createFixture(fdef).setUserData(this);
     }
 
     private void defineTexture(){
@@ -186,7 +193,7 @@ public class Mario extends Sprite implements InteractiveTileObject{
         updateTexture();
         setPosition(b2body.getPosition().x - getWidth() / 1.7f, b2body.getPosition().y - getHeight() / 2);
         //todo sout
-        System.out.println("state: " + state );
+//        System.out.println("state: " + state );
     }
 
     private float calculateStateTimer(STATE oldState){
@@ -272,6 +279,11 @@ public class Mario extends Sprite implements InteractiveTileObject{
             state = STATE.JUMP_FALLING;
         }else if((state == STATE.WALKING || state == STATE.STANDING) && velocityY < 0){
             state = STATE.WALK_FALLING;
+        }else if(state == STATE.JUMPING && velocityY == 0){
+            // todo: this if statement is here to prevent mario getting stuck
+            // todo: when he's hitting a block with the corner of his body.
+            state = STATE.JUMP_FALLING;
+            jumpInterrupted = true;
         }
 
         // update movement animation
@@ -285,29 +297,13 @@ public class Mario extends Sprite implements InteractiveTileObject{
             }
         }
 
-        if(state == STATE.WALK_FALLING || state == STATE.JUMPING || state == STATE.JUMP_FALLING){
-            if(!noFriction){
-                if(b2body.getLinearVelocity().x > 0.5f){
-                    for(Fixture fixture : b2body.getFixtureList()) {
-                        //fixture.setFriction(0);
-                    }
-                }
-            }
-        }else if(noFriction){
-            for(Fixture fixture : b2body.getFixtureList()){
-                if(fixture.getFilterData().categoryBits == MARIO_FEET_BIT){
-                    //fixture.setFriction(0.5f);
-                }else{
-                    //fixture.setFriction(0.2f);
-                }
-            }
-        }
+
 
         // update state timer
         stateTimer = calculateStateTimer(oldState);
     }
 
-    private boolean noFriction = false;
+    public boolean noFriction = false;
 
     private float startLocationY = 0;
     private boolean jumpInterrupted = false;
@@ -328,7 +324,7 @@ public class Mario extends Sprite implements InteractiveTileObject{
             return;
         }
 
-        boolean jump = false;
+        boolean jump;
         float currentLocationY = b2body.getPosition().y;
 
         boolean jumpingFromPlatform = jumpButtonReady && jumpIsPressed;
