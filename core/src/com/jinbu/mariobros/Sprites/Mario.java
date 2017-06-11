@@ -1,5 +1,6 @@
 package com.jinbu.mariobros.Sprites;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -388,7 +389,7 @@ public class Mario extends Sprite implements InteractiveTileObject{
     }
 
     @Override
-    public void collisionOccured(Object object, int filterBit) {
+    public void beginContactCollision(Object object, int filterBit) {
         System.out.println("filterbid: " + filterBit);
         switch(filterBit){
             case MARIO_FEET_BIT | DEFAULT_BIT:
@@ -402,6 +403,45 @@ public class Mario extends Sprite implements InteractiveTileObject{
                 jumpInterrupted = true;
                 break;
         }
+    }
+
+    @Override
+    public void endContactCollision(Contact contact) {
+        Fixture marioFixture = contact.getFixtureA().getUserData() == this ? contact.getFixtureA() : contact.getFixtureB();
+        if(state == STATE.JUMPING) noFriction = true;
+        if(noFriction){
+            marioFixture.setFriction(0);
+            contact.resetFriction();
+        }
+    }
+    private float frictionFreeDT = 0;
+
+    @Override
+    public void preSolveCollision(Contact contact) {
+        Fixture marioFixture = contact.getFixtureA().getUserData() == this ? contact.getFixtureA() : contact.getFixtureB();
+
+        if(frictionFreeDT >= 0.1f){
+            noFriction = false;
+            frictionFreeDT = 0;
+        }
+
+        if(!noFriction){
+            if(marioFixture.getFilterData().categoryBits == MARIO_FEET_BIT){
+                marioFixture.setFriction(0.5f);
+            }else{
+                marioFixture.setFriction(0.2f);
+            }
+            contact.resetFriction();
+        }
+
+        if(state == STATE.STANDING || state == STATE.WALKING){
+            frictionFreeDT += Gdx.graphics.getDeltaTime();
+        }
+    }
+
+    @Override
+    public void postSolveCollision(Contact contact) {
+
     }
 
 }

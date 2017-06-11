@@ -36,7 +36,22 @@ public class InvisibleWall implements InteractiveTileObject {
     }
 
     @Override
-    public void collisionOccured(Object object, int filterBit) {
+    public void beginContactCollision(Object object, int filterBit) {
         // do nothing
+    }
+
+    @Override
+    public void endContactCollision(Contact contact) {
+
+    }
+
+    @Override
+    public void preSolveCollision(Contact contact) {
+
+    }
+
+    @Override
+    public void postSolveCollision(Contact contact) {
+
     }
 }
