@@ -316,7 +316,7 @@ public class Mario extends Sprite implements InteractiveTileObject{
         boolean marioOnAPlatform    = state == STATE.STANDING || state == STATE.WALKING || onPlatform;
         if(!jumpButtonReady) {
             jumpButtonReady = marioOnAPlatform && !jumpIsPressed;
-        }else if(jumpButtonReady && state == STATE.WALK_FALLING){
+        }else if(state == STATE.WALK_FALLING){
             jumpButtonReady = false;
         }
 
@@ -338,7 +338,7 @@ public class Mario extends Sprite implements InteractiveTileObject{
         }else {
             boolean risingInAir         = state == STATE.JUMPING;
             boolean withinMaxJumpHeight = currentLocationY - startLocationY < 0.5f;
-            boolean withinMaxJumpSpeed  = b2body.getLinearVelocity().y <= 2f; // todo: soon probably redundant
+            boolean withinMaxJumpSpeed  = b2body.getLinearVelocity().y <= 2f;
             jump    = risingInAir && withinMaxJumpHeight && withinMaxJumpSpeed && !jumpInterrupted && jumpButtonHolding;
         }
 
@@ -348,42 +348,48 @@ public class Mario extends Sprite implements InteractiveTileObject{
         }
     }
 
-    private Vector2 calculateJumpVelocity(){
-        return null;
-    }
-
     public void moveToRight(boolean isRunning) {
         if(state == STATE.DEAD)return;
 
-        boolean move = false;
-        //todo: the jump limit is wrong. it should be consistent in the air and not faster nor slower. in our case it gets slower.
-        // Check if the run button is pressed
-        // Check if the player is not in the air
-        // Increase the speed limit
-        if(isRunning && b2body.getLinearVelocity().x <= MAX_RUN_VELOCITY_TO_RIGHT){ // && state != STATE.JUMPING
-            move = true;
-        }
-        else if (b2body.getLinearVelocity().x <= MAX_WALK_VELOCITY_TO_RIGHT){
-            move = true;
-        }
+        float maxVelocityX = calculateMaxVelocityX(isRunning);
+        if(maxVelocityX == 0) return;
 
-        if(move){
+        if(b2body.getLinearVelocity().x < maxVelocityX){
             b2body.applyLinearImpulse(walkToRightVelocity, b2body.getWorldCenter(), true);
         }
     }
 
+    private boolean stateInAir(){
+        return state == STATE.JUMPING || state == STATE.JUMP_FALLING || state == STATE.WALK_FALLING;
+    }
+
+    private boolean stateOnPlatform(){
+        return state == STATE.WALKING || state == STATE.STANDING;
+    }
+
+    public float calculateMaxVelocityX(boolean isRunning){
+        float speed = abs(b2body.getLinearVelocity().x);
+        if(state == STATE.JUMPING){
+            if(speed < 0.8) return 0.8f;
+            return speed;
+        }else if(state == STATE.JUMP_FALLING || state == STATE.WALK_FALLING) {
+            if(speed < 0.3) return 0.3f;
+            return speed;
+        }else if(state == STATE.WALKING || state == STATE.STANDING) {
+                return isRunning == true ? MAX_RUN_VELOCITY_TO_RIGHT : MAX_WALK_VELOCITY_TO_RIGHT;
+        }else{
+            return 0;
+        }
+    }
+
+
     public void moveToLeft(boolean isRunning) {
         if(state == STATE.DEAD)return;
 
-        boolean move = false;
-        if(isRunning && b2body.getLinearVelocity().x >= MAX_RUN_VELOCITY_TO_LEFT){
-            move = true;
-        }
-        else if (b2body.getLinearVelocity().x >= MAX_WALK_VELOCITY_TO_LEFT){
-            move = true;
-        }
+        float maxVelocityX = -calculateMaxVelocityX(isRunning);
+        if(maxVelocityX == 0) return;
 
-        if(move){
+        if(b2body.getLinearVelocity().x > maxVelocityX){
             b2body.applyLinearImpulse(walkToLeftVelocity, b2body.getWorldCenter(), true);
         }
     }
@@ -432,9 +438,7 @@ public class Mario extends Sprite implements InteractiveTileObject{
                 marioFixture.setFriction(0.2f);
             }
             contact.resetFriction();
-        }
-
-        if(state == STATE.STANDING || state == STATE.WALKING){
+        } else if(state == STATE.STANDING || state == STATE.WALKING){
             frictionFreeDT += Gdx.graphics.getDeltaTime();
         }
     }
