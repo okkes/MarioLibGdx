@@ -192,7 +192,7 @@ public class Mario extends Sprite implements InteractiveTileObject{
     public void update(float dt){
         updateState();
         updateTexture();
-        setPosition(b2body.getPosition().x - getWidth() / 1.7f, b2body.getPosition().y - getHeight() / 2);
+        setPosition(b2body.getPosition().x - getWidth() / 2, b2body.getPosition().y - getHeight() / 2);
         //todo sout
 //        System.out.println("state: " + state );
     }
