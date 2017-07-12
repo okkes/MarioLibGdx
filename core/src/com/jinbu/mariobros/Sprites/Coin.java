@@ -19,7 +19,7 @@ public class Coin extends InteractiveRectangleObject {
     public Coin (World world, TiledMap map, MapObject object){
         super(world, map, object, 0);
         super.fixture.setUserData(this);
-        setCategoryFIlter(COIN_BIT);
+        setcategoryfilter(COIN_BIT);
     }
 
     @Override

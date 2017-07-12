@@ -52,7 +52,7 @@ public abstract class InteractiveRectangleObject implements InteractiveTileObjec
         fixture = body.createFixture(fdef);
     }
 
-    public void setCategoryFIlter(short filterBit){
+    public void setcategoryfilter(short filterBit){
         Filter filter = new Filter();
         filter.categoryBits = filterBit;
         fixture.setFilterData(filter);

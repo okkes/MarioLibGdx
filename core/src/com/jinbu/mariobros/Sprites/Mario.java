@@ -139,7 +139,8 @@ public class Mario extends Sprite implements InteractiveTileObject{
      */
     private void createFeetForBody(){
         EdgeShape feetShape         = new EdgeShape();
-        feetShape.set(new Vector2(-5.5f / PPM, -7 / PPM), new Vector2(5.5f/ PPM, -7 / PPM));
+        feetShape.set(new Vector2(-5.5f / PPM, -7 / PPM), new Vector2(5.5f/ PPM, -7 / PPM)); //todo: temporary uncomment this. probably no need to make the feet bigger than the body.
+//        feetShape.set(new Vector2(-5f / PPM, -7 / PPM), new Vector2(5/ PPM, -7 / PPM));
 
         FixtureDef fdef             = new FixtureDef();
         fdef.shape                  = feetShape;

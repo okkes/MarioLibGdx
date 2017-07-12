@@ -13,11 +13,13 @@ import com.badlogic.gdx.physics.box2d.World;
  */
 public class Stair extends InteractivePolygonObject{
     public final static String LAYER_NAME   = "stairs";
-    public final static Class<PolygonMapObject> TYPE = PolygonMapObject.class; // TODO: move to super?, make it more dynamic?
+    public final static Class<PolygonMapObject> TYPE = PolygonMapObject.class; // TODO: move to super?, make it more generic?
 
     public Stair (World world, TiledMap map, MapObject object){
         super(world, map, object, 0);
-        super.fixture.setUserData(this);
+        for(int i = 0; i < fixture.length; i++){
+            super.fixture[i].setUserData(this);
+        }
     }
 
     @Override

@@ -18,12 +18,12 @@ public class Brick extends InteractiveRectangleObject {
     public Brick (World world, TiledMap map, MapObject object){
         super(world, map, object, 0);
         super.fixture.setUserData(this);
-        setCategoryFIlter(BRICK_BIT);
+        setcategoryfilter(BRICK_BIT);
     }
 
 //    @Override
 //    public void sensorCollision() {
-//        setCategoryFIlter(DESTROYED_BIT);
+//        setcategoryfilter(DESTROYED_BIT);
 //        getCell().setTile(null);
 //    }
 
@@ -31,7 +31,7 @@ public class Brick extends InteractiveRectangleObject {
     public void beginContactCollision(Object object, int filterBit) {
         switch(filterBit){
             case BRICK_BIT | MARIO_HEAD_BIT:
-                setCategoryFIlter(DESTROYED_BIT);
+                setcategoryfilter(DESTROYED_BIT);
                 getCell().setTile(null);
                 break;
         }

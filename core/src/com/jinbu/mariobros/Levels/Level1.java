@@ -20,6 +20,7 @@ public class Level1{
 
     public Level1(TiledMap map, World world) {
         // todo: for now we are initialising the map in the playscreen class. this code will probably move here.
+        // todo: this could probably be refactored. iterate through all the objects rather than layer names.
 
         // Load the pipes
         for (MapObject object : map.getLayers().get(Pipe.LAYER_NAME).getObjects().getByType(Pipe.TYPE)){
