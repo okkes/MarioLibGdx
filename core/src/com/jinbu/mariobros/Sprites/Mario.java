@@ -395,6 +395,10 @@ public class Mario extends Sprite implements InteractiveTileObject{
         }
     }
 
+    private boolean headCollisionOccured = false;
+
+    public boolean justBrokeObject = false;
+
     @Override
     public void beginContactCollision(Object object, int filterBit) {
         System.out.println("filterbid: " + filterBit);
@@ -402,7 +406,8 @@ public class Mario extends Sprite implements InteractiveTileObject{
             case MARIO_FEET_BIT | DEFAULT_BIT:
             case MARIO_FEET_BIT | BRICK_BIT:
             case MARIO_FEET_BIT | COIN_BIT:
-                onPlatform = true;
+                onPlatform      = true;
+                justBrokeObject = false;
                 break;
             case MARIO_HEAD_BIT | DEFAULT_BIT:
             case MARIO_HEAD_BIT | BRICK_BIT:

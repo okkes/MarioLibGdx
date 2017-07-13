@@ -31,8 +31,11 @@ public class Brick extends InteractiveRectangleObject {
     public void beginContactCollision(Object object, int filterBit) {
         switch(filterBit){
             case BRICK_BIT | MARIO_HEAD_BIT:
-                setcategoryfilter(DESTROYED_BIT);
-                getCell().setTile(null);
+                if(!((Mario)object).justBrokeObject) {
+                    setcategoryfilter(DESTROYED_BIT);
+                    getCell().setTile(null);
+                    ((Mario)object).justBrokeObject = true;
+                }
                 break;
         }
     }

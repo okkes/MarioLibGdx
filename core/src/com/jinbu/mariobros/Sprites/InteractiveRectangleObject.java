@@ -34,9 +34,8 @@ public abstract class InteractiveRectangleObject implements InteractiveTileObjec
         FixtureDef fdef     = new FixtureDef();
         PolygonShape shape  = new PolygonShape();
 
-        if(friction != 0){
-            fdef.friction       = friction;
-        }
+        if(friction != 0) fdef.friction = friction;
+
         fdef.restitution    = 0;
         bdef.type           = BodyDef.BodyType.StaticBody;
 
