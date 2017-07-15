@@ -7,7 +7,7 @@ import com.badlogic.gdx.physics.box2d.Contact;
  */
 public interface InteractiveTileObject {
     void beginContactCollision(Object object, int filterBit);
-    void endContactCollision(Contact contact);
-    void preSolveCollision(Contact contact);
-    void postSolveCollision(Contact contact);
+    void endContactCollision(Contact contact, int filterBit);
+    void preSolveCollision(Contact contact, int filterBit);
+    void postSolveCollision(Contact contact, int filterBit);
 }

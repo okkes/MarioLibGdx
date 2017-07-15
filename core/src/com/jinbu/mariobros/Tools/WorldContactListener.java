@@ -9,14 +9,11 @@ import com.jinbu.mariobros.Sprites.*;
 public class WorldContactListener implements ContactListener{
     @Override
     public void beginContact(Contact contact) {
-        int categoryBit = contact.getFixtureA().getFilterData().categoryBits |
-                contact.getFixtureB().getFilterData().categoryBits;
-
         InteractiveTileObject objectA = (InteractiveTileObject)contact.getFixtureA().getUserData();
         InteractiveTileObject objectB = (InteractiveTileObject)contact.getFixtureB().getUserData();
 
-        objectA.beginContactCollision(objectB, categoryBit);
-        objectB.beginContactCollision(objectA, categoryBit);
+        objectA.beginContactCollision(objectB, filterBit(contact));
+        objectB.beginContactCollision(objectA, filterBit(contact));
     }
 
     @Override
@@ -24,8 +21,8 @@ public class WorldContactListener implements ContactListener{
         InteractiveTileObject objectA = (InteractiveTileObject)contact.getFixtureA().getUserData();
         InteractiveTileObject objectB = (InteractiveTileObject)contact.getFixtureB().getUserData();
 
-        objectA.endContactCollision(contact);
-        objectB.endContactCollision(contact);
+        objectA.endContactCollision(contact, filterBit(contact));
+        objectB.endContactCollision(contact, filterBit(contact));
     }
 
     @Override
@@ -33,8 +30,8 @@ public class WorldContactListener implements ContactListener{
         InteractiveTileObject objectA = (InteractiveTileObject)contact.getFixtureA().getUserData();
         InteractiveTileObject objectB = (InteractiveTileObject)contact.getFixtureB().getUserData();
 
-        objectA.preSolveCollision(contact);
-        objectB.preSolveCollision(contact);
+        objectA.preSolveCollision(contact, filterBit(contact));
+        objectB.preSolveCollision(contact, filterBit(contact));
     }
 
     @Override
@@ -42,7 +39,12 @@ public class WorldContactListener implements ContactListener{
         InteractiveTileObject objectA = (InteractiveTileObject)contact.getFixtureA().getUserData();
         InteractiveTileObject objectB = (InteractiveTileObject)contact.getFixtureB().getUserData();
 
-        objectA.postSolveCollision(contact);
-        objectB.postSolveCollision(contact);
+        objectA.postSolveCollision(contact, filterBit(contact));
+        objectB.postSolveCollision(contact, filterBit(contact));
+    }
+
+    private int filterBit(Contact contact){
+        return contact.getFixtureA().getFilterData().categoryBits |
+                contact.getFixtureB().getFilterData().categoryBits;
     }
 }

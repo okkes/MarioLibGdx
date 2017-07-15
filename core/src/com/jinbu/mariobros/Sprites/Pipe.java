@@ -25,17 +25,17 @@ public class Pipe extends InteractiveRectangleObject {
     }
 
     @Override
-    public void endContactCollision(Contact contact) {
+    public void endContactCollision(Contact contact, int filterBit) {
 
     }
 
     @Override
-    public void preSolveCollision(Contact contact) {
+    public void preSolveCollision(Contact contact, int filterBit) {
 
     }
 
     @Override
-    public void postSolveCollision(Contact contact) {
+    public void postSolveCollision(Contact contact, int filterBit) {
 
     }
 }

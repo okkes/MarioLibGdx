@@ -17,18 +17,8 @@ import static java.lang.Math.abs;
  */
 public class Mario extends Sprite implements InteractiveTileObject{
 
-    //TODO: TEMPORARY CODE
-    public enum States{FALLING, JUMPING, STANDING, RUNNING};
-    public States CurrentState;
-    public States PreviousState;
-    private Animation<TextureRegion> MarioRun;
-    private Animation<TextureRegion> MarioJump;
-    private boolean runningRight;
-    private float stateTimer; // This will use to keep track of the amount of time we are in any given stateNew like a jump stateNew or run stateNew.
-    //TODO: END OF TEMP CODE
 
-    // TODO: TEMP CODE
-    // TODO: END TEMP CODE
+    private float stateTimer; // This will use to keep track of the amount of time we are in any given stateNew like a jump stateNew or run stateNew.
     public enum STATE{
         JUMPING,
         JUMP_FALLING,
@@ -77,7 +67,7 @@ public class Mario extends Sprite implements InteractiveTileObject{
     // The physical body of mario that will be used in the physics world.
     public Body b2body; // todo: temporary public. change it to private
 
-    private boolean onPlatform;
+    private int amountOfPlatformsStanding;
 
     public Mario(World world, PlayScreen screen){
         // make a call to super, which is a sprite class and it can take a textureregion that we can manupulate later.
@@ -114,7 +104,14 @@ public class Mario extends Sprite implements InteractiveTileObject{
 
         // Attach the fixture to the body
         PolygonShape shape = new PolygonShape();
-        shape.setAsBox(5 / PPM, 5 / PPM);
+        Vector2[] vertices = new Vector2[6];
+        vertices[0] = new Vector2(-5, 5).scl(1 / PPM);
+        vertices[1] = new Vector2(5, 5).scl(1 / PPM);
+        vertices[2] = new Vector2(-5f, -4).scl(1 / PPM);
+        vertices[3] = new Vector2(5f, -4).scl(1 / PPM);
+        vertices[4] = new Vector2(-4.75f, -5).scl(1 / PPM);
+        vertices[5] = new Vector2(4.75f, -5).scl(1 / PPM);
+        shape.set(vertices);
 
         FixtureDef fdef             = new FixtureDef();
         fdef.shape                  = shape;
@@ -139,7 +136,7 @@ public class Mario extends Sprite implements InteractiveTileObject{
      */
     private void createFeetForBody(){
         EdgeShape feetShape         = new EdgeShape();
-        feetShape.set(new Vector2(-5.5f / PPM, -7 / PPM), new Vector2(5.5f/ PPM, -7 / PPM)); //todo: temporary uncomment this. probably no need to make the feet bigger than the body.
+        feetShape.set(new Vector2(-4.3f / PPM, -7 / PPM), new Vector2(4.3f/ PPM, -7 / PPM)); //todo: temporary uncomment this. probably no need to make the feet bigger than the body.
 //        feetShape.set(new Vector2(-5f / PPM, -7 / PPM), new Vector2(5/ PPM, -7 / PPM));
 
         FixtureDef fdef             = new FixtureDef();
@@ -147,7 +144,12 @@ public class Mario extends Sprite implements InteractiveTileObject{
         fdef.filter.categoryBits    = MARIO_FEET_BIT;
         fdef.filter.maskBits        = DEFAULT_BIT | COIN_BIT | BRICK_BIT;
         fdef.friction               = 0.5f;
-        fdef.isSensor               = false;
+        fdef.isSensor               = true;
+        b2body.createFixture(fdef).setUserData(this);
+        //todo: test
+        fdef.filter.categoryBits = MARIO_BIT;
+        fdef.isSensor = false;
+        feetShape.set(new Vector2(-5.5f / PPM, -7 / PPM), new Vector2(5.5f / PPM, -7 / PPM));
         b2body.createFixture(fdef).setUserData(this);
 
 //        EdgeShape feetSensor = new EdgeShape();
@@ -183,7 +185,6 @@ public class Mario extends Sprite implements InteractiveTileObject{
         state       = STATE.STANDING;
         direction   = DIRECTION.RIGHT;
         stateTimer  = 0;
-        onPlatform  = true;
     }
 
     public float getPositionX(){
@@ -195,9 +196,12 @@ public class Mario extends Sprite implements InteractiveTileObject{
         updateTexture();
         setPosition(b2body.getPosition().x - getWidth() / 2, b2body.getPosition().y - getHeight() / 2);
         //todo sout
-//        System.out.println("state: " + state );
+        if(tmepState != state){
+            System.out.println("state is: " + state);
+            tmepState = state;
+        }
     }
-
+    private STATE tmepState;
     private float calculateStateTimer(STATE oldState){
         // The action changed. Reset the timer.
         if(oldState!= state){
@@ -267,10 +271,10 @@ public class Mario extends Sprite implements InteractiveTileObject{
         STATE oldState  = state;
 
         if(velocityY < 0){
-            onPlatform = false;
-        }else if(onPlatform && velocityX == 0){
+//            amountOfPlatformsStanding = false;
+        }else if(amountOfPlatformsStanding > 0 && velocityX == 0){
             state = STATE.STANDING;
-        }else if(onPlatform && velocityX != 0){
+        }else if(amountOfPlatformsStanding > 0 && velocityX != 0){
             state = STATE.WALKING;
         }
 
@@ -285,7 +289,7 @@ public class Mario extends Sprite implements InteractiveTileObject{
             // todo: this if statement is here to prevent mario getting stuck
             // todo: when he's hitting a block with the corner of his body.
             state = STATE.JUMP_FALLING;
-            jumpInterrupted = true;
+//            jumpInterrupted = true;
         }
 
         // update movement animation
@@ -307,46 +311,39 @@ public class Mario extends Sprite implements InteractiveTileObject{
 
     public boolean noFriction = false;
 
-    private float startLocationY = 0;
-    private boolean jumpInterrupted = false;
-    private boolean jumpButtonReady = false;
-    private boolean jumpButtonHolding = false;
-    public void jump(boolean jumpIsPressed) {
-        if(state == STATE.DEAD)return;
-
-        boolean marioOnAPlatform    = state == STATE.STANDING || state == STATE.WALKING || onPlatform;
-        if(!jumpButtonReady) {
-            jumpButtonReady = marioOnAPlatform && !jumpIsPressed;
-        }else if(state == STATE.WALK_FALLING){
-            jumpButtonReady = false;
-        }
-
-        if(!jumpIsPressed){
-            jumpButtonHolding = false;
+    private float locationYBeforeJump = 0;
+    private boolean listenToJumpButton = false;
+    private boolean oldJumpButtonPressed = false;
+    public void jump(boolean jumpButtonPressed) {
+        // Listen to the jump button if the jump button
+        // was let go in the previous iteration and mario is on a platform.
+        if(!jumpButtonPressed){
+            oldJumpButtonPressed    = jumpButtonPressed;
+            listenToJumpButton      = false;
             return;
         }
 
-        boolean jump;
+        if(!listenToJumpButton){
+            listenToJumpButton = amountOfPlatformsStanding > 0 && !oldJumpButtonPressed;
+        }
+
         float currentLocationY = b2body.getPosition().y;
 
-        boolean jumpingFromPlatform = jumpButtonReady && jumpIsPressed;
-        if(jumpingFromPlatform){
-            jump                = true;
-            startLocationY      = currentLocationY;
-            jumpButtonReady     = false;
-            jumpButtonHolding   = true;
-            jumpInterrupted     = false;
-        }else {
-            boolean risingInAir         = state == STATE.JUMPING;
-            boolean withinMaxJumpHeight = currentLocationY - startLocationY < 0.5f;
+        // Check if Mario is jumping from platform or in process of jumping
+        if(amountOfPlatformsStanding > 0){
+            locationYBeforeJump = currentLocationY;
+        } else if(listenToJumpButton){
+            boolean inAir               = state == STATE.JUMPING;
+            boolean withinMaxJumpHeight = currentLocationY - locationYBeforeJump < 0.55f; // todo + additional increase in height according to it's x velocity
             boolean withinMaxJumpSpeed  = b2body.getLinearVelocity().y <= 2f;
-            jump    = risingInAir && withinMaxJumpHeight && withinMaxJumpSpeed && !jumpInterrupted && jumpButtonHolding;
+            listenToJumpButton          = inAir && withinMaxJumpHeight && withinMaxJumpSpeed;
         }
 
-        if(jump) {
-            onPlatform = false;
+        if(listenToJumpButton) {
             b2body.applyLinearImpulse(new Vector2(0, 2.1f - b2body.getLinearVelocity().y), b2body.getWorldCenter(), true);
         }
+
+        oldJumpButtonPressed = jumpButtonPressed;
     }
 
     public void moveToRight(boolean isRunning) {
@@ -358,14 +355,6 @@ public class Mario extends Sprite implements InteractiveTileObject{
         if(b2body.getLinearVelocity().x < maxVelocityX){
             b2body.applyLinearImpulse(walkToRightVelocity, b2body.getWorldCenter(), true);
         }
-    }
-
-    private boolean stateInAir(){
-        return state == STATE.JUMPING || state == STATE.JUMP_FALLING || state == STATE.WALK_FALLING;
-    }
-
-    private boolean stateOnPlatform(){
-        return state == STATE.WALKING || state == STATE.STANDING;
     }
 
     public float calculateMaxVelocityX(boolean isRunning){
@@ -383,7 +372,6 @@ public class Mario extends Sprite implements InteractiveTileObject{
         }
     }
 
-
     public void moveToLeft(boolean isRunning) {
         if(state == STATE.DEAD)return;
 
@@ -395,41 +383,46 @@ public class Mario extends Sprite implements InteractiveTileObject{
         }
     }
 
-    private boolean headCollisionOccured = false;
-
     public boolean justBrokeObject = false;
 
     @Override
     public void beginContactCollision(Object object, int filterBit) {
-        System.out.println("filterbid: " + filterBit);
         switch(filterBit){
             case MARIO_FEET_BIT | DEFAULT_BIT:
             case MARIO_FEET_BIT | BRICK_BIT:
             case MARIO_FEET_BIT | COIN_BIT:
-                onPlatform      = true;
+                amountOfPlatformsStanding++;
                 justBrokeObject = false;
+                System.out.println("Feet collision occurred");
                 break;
             case MARIO_HEAD_BIT | DEFAULT_BIT:
             case MARIO_HEAD_BIT | BRICK_BIT:
             case MARIO_HEAD_BIT | COIN_BIT:
-                jumpInterrupted = true;
+//                jumpInterrupted = true;
                 break;
         }
     }
 
     @Override
-    public void endContactCollision(Contact contact) {
+    public void endContactCollision(Contact contact, int filterBit) {
         Fixture marioFixture = contact.getFixtureA().getUserData() == this ? contact.getFixtureA() : contact.getFixtureB();
-        if(state == STATE.JUMPING) noFriction = true;
+        if(state == STATE.JUMPING || state == STATE.WALK_FALLING) noFriction = true;
+
         if(noFriction){
             marioFixture.setFriction(0);
             contact.resetFriction();
         }
+
+        if(marioFixture.getFilterData().categoryBits == MARIO_FEET_BIT){
+            amountOfPlatformsStanding--;
+            System.out.println("Collision with feet ended.");
+        }
+
     }
     private float frictionFreeDT = 0;
 
     @Override
-    public void preSolveCollision(Contact contact) {
+    public void preSolveCollision(Contact contact, int filterBit) {
         Fixture marioFixture = contact.getFixtureA().getUserData() == this ? contact.getFixtureA() : contact.getFixtureB();
 
         if(frictionFreeDT >= 0.1f){
@@ -450,7 +443,7 @@ public class Mario extends Sprite implements InteractiveTileObject{
     }
 
     @Override
-    public void postSolveCollision(Contact contact) {
+    public void postSolveCollision(Contact contact, int filterBit) {
 
     }
 

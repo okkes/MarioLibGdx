@@ -24,21 +24,20 @@ public class Stair extends InteractivePolygonObject{
 
     @Override
     public void beginContactCollision(Object object, int filterBit) {
-        Gdx.app.log(LAYER_NAME, "Collision");
     }
 
     @Override
-    public void endContactCollision(Contact contact) {
-
-    }
-
-    @Override
-    public void preSolveCollision(Contact contact) {
+    public void endContactCollision(Contact contact, int filterBit) {
 
     }
 
     @Override
-    public void postSolveCollision(Contact contact) {
+    public void preSolveCollision(Contact contact, int filterBit) {
+
+    }
+
+    @Override
+    public void postSolveCollision(Contact contact, int filterBit) {
 
     }
 }
