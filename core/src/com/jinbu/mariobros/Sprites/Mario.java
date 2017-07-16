@@ -185,6 +185,8 @@ public class Mario extends Sprite implements InteractiveTileObject{
         state       = STATE.STANDING;
         direction   = DIRECTION.RIGHT;
         stateTimer  = 0;
+        amountOfPlatformsStanding = 0;
+        readyToHit = true;
     }
 
     public float getPositionX(){
@@ -196,21 +198,14 @@ public class Mario extends Sprite implements InteractiveTileObject{
         updateTexture();
         setPosition(b2body.getPosition().x - getWidth() / 2, b2body.getPosition().y - getHeight() / 2);
         //todo sout
-        if(tmepState != state){
-            System.out.println("state is: " + state);
-            tmepState = state;
-        }
     }
-    private STATE tmepState;
+
     private float calculateStateTimer(STATE oldState){
         // The action changed. Reset the timer.
-        if(oldState!= state){
-            return 0;
-        }
+        if(oldState!= state) return 0;
+
         // Increase the stateTimer according to the speed of the body
-        else{
-            return stateTimer + (abs(b2body.getLinearVelocity().x) / 100 * 5f);
-        }
+        return stateTimer + (abs(b2body.getLinearVelocity().x) / 100 * 5f);
     }
 
     private void updateTexture(){
@@ -223,6 +218,7 @@ public class Mario extends Sprite implements InteractiveTileObject{
                 break;
             case STANDING:
                 region = marioStand;
+                marioFall   = marioRun.getKeyFrame(stateTimer, false);
                 break;
             case WALKING:
                 region      = marioRun.getKeyFrame(stateTimer, true);
@@ -270,40 +266,28 @@ public class Mario extends Sprite implements InteractiveTileObject{
         float velocityY = b2body.getLinearVelocity().y;
         STATE oldState  = state;
 
-        if(velocityY < 0){
-//            amountOfPlatformsStanding = false;
-        }else if(amountOfPlatformsStanding > 0 && velocityX == 0){
+        // update walk state
+        if(amountOfPlatformsStanding > 0 && velocityX == 0){
             state = STATE.STANDING;
         }else if(amountOfPlatformsStanding > 0 && velocityX != 0){
             state = STATE.WALKING;
+            if(velocityX > 0){
+                direction = DIRECTION.RIGHT;
+            } else if(velocityX < 0){
+                direction = DIRECTION.LEFT;
+            }
         }
-
         // update jump state
-        if(velocityY > 0 ){
+        else if(velocityY > 0 ){
             state = STATE.JUMPING;
         }else if(state == STATE.JUMPING && velocityY < 0){
             state = STATE.JUMP_FALLING;
         }else if((state == STATE.WALKING || state == STATE.STANDING) && velocityY < 0){
             state = STATE.WALK_FALLING;
         }else if(state == STATE.JUMPING && velocityY == 0){
-            // todo: this if statement is here to prevent mario getting stuck
-            // todo: when he's hitting a block with the corner of his body.
+            // Mario probably hit his head to something which leads to a 0 velocity in Y direction. Let him fall.
             state = STATE.JUMP_FALLING;
-//            jumpInterrupted = true;
         }
-
-        // update movement animation
-        if(state == STATE.WALKING || state == STATE.STANDING) {
-            if(velocityX > 0) {
-                direction   = DIRECTION.RIGHT;
-                state       = STATE.WALKING;
-            }else if (velocityX < 0) {
-                direction   = DIRECTION.LEFT;
-                state       = STATE.WALKING;
-            }
-        }
-
-
 
         // update state timer
         stateTimer = calculateStateTimer(oldState);
@@ -333,13 +317,12 @@ public class Mario extends Sprite implements InteractiveTileObject{
         if(amountOfPlatformsStanding > 0){
             locationYBeforeJump = currentLocationY;
         } else if(listenToJumpButton){
-            boolean inAir               = state == STATE.JUMPING;
             boolean withinMaxJumpHeight = currentLocationY - locationYBeforeJump < 0.55f; // todo + additional increase in height according to it's x velocity
-            boolean withinMaxJumpSpeed  = b2body.getLinearVelocity().y <= 2f;
-            listenToJumpButton          = inAir && withinMaxJumpHeight && withinMaxJumpSpeed;
+            listenToJumpButton          = state == STATE.JUMPING && withinMaxJumpHeight;
         }
 
-        if(listenToJumpButton) {
+        boolean withinMaxJumpSpeed  = b2body.getLinearVelocity().y <= 2f;
+        if(listenToJumpButton && withinMaxJumpSpeed) {
             b2body.applyLinearImpulse(new Vector2(0, 2.1f - b2body.getLinearVelocity().y), b2body.getWorldCenter(), true);
         }
 
@@ -359,16 +342,20 @@ public class Mario extends Sprite implements InteractiveTileObject{
 
     public float calculateMaxVelocityX(boolean isRunning){
         float speed = abs(b2body.getLinearVelocity().x);
-        if(state == STATE.JUMPING){
-            if(speed < 0.8) return 0.8f;
-            return speed;
-        }else if(state == STATE.JUMP_FALLING || state == STATE.WALK_FALLING) {
-            if(speed < 0.3) return 0.3f;
-            return speed;
-        }else if(state == STATE.WALKING || state == STATE.STANDING) {
-                return isRunning == true ? MAX_RUN_VELOCITY_TO_RIGHT : MAX_WALK_VELOCITY_TO_RIGHT;
-        }else{
-            return 0;
+        switch(state){
+            case JUMPING:
+                if(speed < 0.8) return 0.8f;
+                return speed;
+            case JUMP_FALLING:
+            case WALK_FALLING:
+                if(speed < 0.3) return 0.3f;
+                return speed;
+            case WALKING:
+            case STANDING:
+                if(isRunning) return MAX_RUN_VELOCITY_TO_RIGHT;
+                return MAX_WALK_VELOCITY_TO_RIGHT;
+            default:
+                return 0;
         }
     }
 
@@ -383,7 +370,7 @@ public class Mario extends Sprite implements InteractiveTileObject{
         }
     }
 
-    public boolean justBrokeObject = false;
+    public boolean readyToHit;
 
     @Override
     public void beginContactCollision(Object object, int filterBit) {
@@ -392,13 +379,7 @@ public class Mario extends Sprite implements InteractiveTileObject{
             case MARIO_FEET_BIT | BRICK_BIT:
             case MARIO_FEET_BIT | COIN_BIT:
                 amountOfPlatformsStanding++;
-                justBrokeObject = false;
-                System.out.println("Feet collision occurred");
-                break;
-            case MARIO_HEAD_BIT | DEFAULT_BIT:
-            case MARIO_HEAD_BIT | BRICK_BIT:
-            case MARIO_HEAD_BIT | COIN_BIT:
-//                jumpInterrupted = true;
+                readyToHit = true;
                 break;
         }
     }
@@ -414,8 +395,7 @@ public class Mario extends Sprite implements InteractiveTileObject{
         }
 
         if(marioFixture.getFilterData().categoryBits == MARIO_FEET_BIT){
-            amountOfPlatformsStanding--;
-            System.out.println("Collision with feet ended.");
+            if(amountOfPlatformsStanding > 0) amountOfPlatformsStanding--;
         }
 
     }

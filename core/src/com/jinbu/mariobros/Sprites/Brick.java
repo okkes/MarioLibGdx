@@ -31,13 +31,17 @@ public class Brick extends InteractiveRectangleObject {
     public void beginContactCollision(Object object, int filterBit) {
         switch(filterBit){
             case BRICK_BIT | MARIO_HEAD_BIT:
-                if(!((Mario)object).justBrokeObject) {
+                if(((Mario)object).readyToHit) {
                     setcategoryfilter(DESTROYED_BIT);
                     getCell().setTile(null);
-                    ((Mario)object).justBrokeObject = true;
+                    ((Mario)object).readyToHit = false;
                 }
                 break;
         }
+    }
+
+    private void destroyedByPlayer(){
+
     }
 
     @Override
