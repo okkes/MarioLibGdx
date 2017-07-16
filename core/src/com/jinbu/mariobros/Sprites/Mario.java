@@ -186,7 +186,7 @@ public class Mario extends Sprite implements InteractiveTileObject{
         direction   = DIRECTION.RIGHT;
         stateTimer  = 0;
         amountOfPlatformsStanding = 0;
-        readyToHit = true;
+        readyToHit = false;
     }
 
     public float getPositionX(){
@@ -323,7 +323,8 @@ public class Mario extends Sprite implements InteractiveTileObject{
 
         boolean withinMaxJumpSpeed  = b2body.getLinearVelocity().y <= 2f;
         if(listenToJumpButton && withinMaxJumpSpeed) {
-            b2body.applyLinearImpulse(new Vector2(0, 2.1f - b2body.getLinearVelocity().y), b2body.getWorldCenter(), true);
+            Vector2 impulse = new Vector2(0, 2f - b2body.getLinearVelocity().y);
+            b2body.applyLinearImpulse(impulse, b2body.getWorldCenter(), true);
         }
 
         oldJumpButtonPressed = jumpButtonPressed;

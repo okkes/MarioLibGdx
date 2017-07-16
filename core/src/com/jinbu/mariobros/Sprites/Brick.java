@@ -32,7 +32,6 @@ public class Brick extends InteractiveRectangleObject {
         switch(filterBit){
             case BRICK_BIT | MARIO_HEAD_BIT:
                 if(((Mario)object).readyToHit) {
-                    setcategoryfilter(DESTROYED_BIT);
                     getCell().setTile(null);
                     ((Mario)object).readyToHit = false;
                 }
@@ -46,7 +45,9 @@ public class Brick extends InteractiveRectangleObject {
 
     @Override
     public void endContactCollision(Contact contact, int filterBit) {
-
+        if(getCell().getTile() == null){
+            setcategoryfilter(DESTROYED_BIT);
+        }
     }
 
     @Override
